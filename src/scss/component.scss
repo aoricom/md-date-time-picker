@@ -27,6 +27,11 @@
   -webkit-tap-highlight-color: transparent;
   -webkit-tap-highlight-color: rgba(255, 255, 255, 0);
 }
+
+#mddtp-date__unset {
+  margin-right: 64px;
+}
+
 .mddtp-button:hover,
 .mddtp-button:focus {
   background-color: $md-button-color--focus;

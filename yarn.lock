@@ -4191,9 +4191,9 @@ request@2.78.0:
     tough-cookie "~2.3.0"
     tunnel-agent "~0.4.1"
 
-require-dir@^0.3.1:
-  version "0.3.1"
-  resolved "https://registry.yarnpkg.com/require-dir/-/require-dir-0.3.1.tgz#b5a8e28bae0343bb0d0cc38ab1f531e1931b264a"
+require-dir@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/require-dir/-/require-dir-1.0.0.tgz#c2639de72960ea1ee280279f2da35e03c6536b2d"
 
 require-directory@^2.1.1:
   version "2.1.1"

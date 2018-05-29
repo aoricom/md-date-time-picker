@@ -92,6 +92,8 @@
           ok = _ref$ok === undefined ? 'ok' : _ref$ok,
           _ref$cancel = _ref.cancel,
           cancel = _ref$cancel === undefined ? 'cancel' : _ref$cancel,
+          _ref$unset = _ref.unset,
+          unset = _ref$unset === undefined ? 'not set' : _ref$unset,
           _ref$colon = _ref.colon,
           colon = _ref$colon === undefined ? !0 : _ref$colon,
           _ref$autoClose = _ref.autoClose,
@@ -101,7 +103,9 @@
           _ref$prevHandle = _ref.prevHandle,
           prevHandle = _ref$prevHandle === undefined ? '<div class="mddtp-prev-handle"></div>' : _ref$prevHandle,
           _ref$nextHandle = _ref.nextHandle,
-          nextHandle = _ref$nextHandle === undefined ? '<div class="mddtp-next-handle"></div>' : _ref$nextHandle;
+          nextHandle = _ref$nextHandle === undefined ? '<div class="mddtp-next-handle"></div>' : _ref$nextHandle,
+          _ref$container = _ref.container,
+          container = _ref$container === undefined ? document.body : _ref$container;
 
       _classCallCheck(this, mdDateTimePicker);
 
@@ -114,11 +118,13 @@
       this._trigger = trigger;
       this._ok = ok;
       this._cancel = cancel;
+      this._unset = unset;
       this._colon = colon;
       this._autoClose = autoClose;
       this._inner24 = inner24;
       this._prevHandle = prevHandle;
       this._nextHandle = nextHandle;
+      this._container = container;
 
       /**
       * [dialog selected classes have the same structure as dialog but one level down]
@@ -132,7 +138,7 @@
       this._sDialog = {};
 
       // attach the dialog if not present
-      if (typeof document !== 'undefined' && !document.getElementById('mddtp-picker__' + this._type)) {
+      if (typeof document !== 'undefined' && !this._container.querySelector('#mddtp-picker__' + this._type)) {
         this._buildDialog();
       }
     }
@@ -191,17 +197,17 @@
       key: '_selectDialog',
       value: function _selectDialog() {
         // now do what you normally would do
-        this._sDialog.picker = document.getElementById('mddtp-picker__' + [this._type]);
+        this._sDialog.picker = this._container.querySelector('#mddtp-picker__' + [this._type]);
         /**
         * [sDialogEls stores all inner components of the selected dialog or sDialog to be later getElementById]
         *
         * @type {Array}
         */
-        var sDialogEls = ['viewHolder', 'years', 'header', 'cancel', 'ok', 'left', 'right', 'previous', 'current', 'next', 'subtitle', 'title', 'titleDay', 'titleMonth', 'AM', 'PM', 'needle', 'hourView', 'minuteView', 'hour', 'minute', 'fakeNeedle', 'circularHolder', 'circle', 'dotSpan'],
+        var sDialogEls = ['viewHolder', 'years', 'header', 'unset', 'cancel', 'ok', 'left', 'right', 'previous', 'current', 'next', 'subtitle', 'title', 'titleDay', 'titleMonth', 'AM', 'PM', 'needle', 'hourView', 'minuteView', 'hour', 'minute', 'fakeNeedle', 'circularHolder', 'circle', 'dotSpan'],
             i = sDialogEls.length;
 
         while (i--) {
-          this._sDialog[sDialogEls[i]] = document.getElementById('mddtp-' + this._type + '__' + sDialogEls[i]);
+          this._sDialog[sDialogEls[i]] = this._container.querySelector('#mddtp-' + this._type + '__' + sDialogEls[i]);
         }
 
         this._sDialog.tDate = this._init.clone();
@@ -290,7 +296,8 @@
             body = document.createElement('div'),
             action = document.createElement('div'),
             cancel = document.createElement('button'),
-            ok = document.createElement('button');
+            ok = document.createElement('button'),
+            unset = document.createElement('button');
         // outer most container of the picker
 
         // header container of the picker
@@ -463,6 +470,9 @@
           action.style.display = 'none';
         }
 
+        this._addId(unset, 'unset');
+        unset.classList.add('mddtp-button');
+        unset.setAttribute('type', 'button');
         this._addId(cancel, 'cancel');
         cancel.classList.add('mddtp-button');
         cancel.setAttribute('type', 'button');
@@ -470,13 +480,14 @@
         ok.classList.add('mddtp-button');
         ok.setAttribute('type', 'button');
         // add actions
+        action.appendChild(unset);
         action.appendChild(cancel);
         action.appendChild(ok);
         // add actions to body
         body.appendChild(action);
         docfrag.appendChild(container);
         // add the container to the end of body
-        document.getElementsByTagName('body').item(0).appendChild(docfrag);
+        this._container.appendChild(docfrag);
       }
     }, {
       key: '_initTimeDialog',
@@ -874,7 +885,7 @@
             years = me._sDialog.years,
             title = me._sDialog.title,
             subtitle = me._sDialog.subtitle,
-            currentYear = document.getElementById('mddtp-date__currentYear');
+            currentYear = me._container.querySelector('#mddtp-date__currentYear');
 
         if (mdDateTimePicker.dialog.view) {
           viewHolder.classList.add('zoomOut');
@@ -909,7 +920,7 @@
 
         hourView.onclick = function (e) {
           var sHour = 'mddtp-hour__selected',
-              selectedHour = document.getElementById(sHour),
+              selectedHour = me._container.querySelector('#' + sHour),
               setHour = 0;
 
           if (e.target && e.target.nodeName === 'SPAN') {
@@ -939,7 +950,7 @@
         };
         minuteView.onclick = function (e) {
           var sMinute = 'mddtp-minute__selected',
-              selectedMinute = document.getElementById(sMinute),
+              selectedMinute = me._container.querySelector('#' + sMinute),
               setMinute = 0;
 
           if (e.target && e.target.nodeName === 'SPAN') {
@@ -974,7 +985,7 @@
                 currentDate = me._sDialog.tDate.date(day),
                 sId = 'mddtp-date__selected',
                 sClass = 'mddtp-picker__cell--selected',
-                selected = document.getElementById(sId),
+                selected = me._container.querySelector('#' + sId),
                 subtitle = me._sDialog.subtitle,
                 titleDay = me._sDialog.titleDay,
                 titleMonth = me._sDialog.titleMonth;
@@ -1119,7 +1130,7 @@
         var me = this;
         el.onclick = function (e) {
           if (e.target && e.target.nodeName === 'LI') {
-            var selected = document.getElementById('mddtp-date__currentYear');
+            var selected = me._container.querySelector('#mddtp-date__currentYear');
             // clear previous selected
             selected.id = '';
             selected.classList.remove('mddtp-picker__li--current');
@@ -1249,7 +1260,7 @@
         var onDragEnd = function onDragEnd() {
           var minuteViewChildren = me._sDialog.minuteView.getElementsByTagName('div'),
               sMinute = 'mddtp-minute__selected',
-              selectedMinute = document.getElementById(sMinute),
+              selectedMinute = me._container.querySelector('#' + sMinute),
               cOffset = circle.getBoundingClientRect();
 
           fakeNeedle.style.left = 'left:' + (cOffset.left - hOffset.left) + 'px';
@@ -1289,10 +1300,20 @@
         var me = this,
             ok = this._sDialog.ok,
             cancel = this._sDialog.cancel,
+            unset = this._sDialog.unset,
             onCancel = new CustomEvent('onCancel'),
-            onOk = new CustomEvent('onOk');
+            onOk = new CustomEvent('onOk'),
+            onUnset = new CustomEvent('onUnset');
+
         // create cutom events to dispatch
 
+
+        unset.onclick = function () {
+          me.toggle();
+          if (me._trigger) {
+            me._trigger.dispatchEvent(onUnset);
+          }
+        };
         cancel.onclick = function () {
           me.toggle();
           if (me._trigger) {
@@ -1312,6 +1333,7 @@
       value: function _setButtonText() {
         this._sDialog.cancel.textContent = this._cancel;
         this._sDialog.ok.textContent = this._ok;
+        this._sDialog.unset.textContent = this._unset;
       }
     }, {
       key: '_getMonth',

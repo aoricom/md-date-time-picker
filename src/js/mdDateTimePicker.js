@@ -45,11 +45,13 @@ class mdDateTimePicker {
     trigger = '',
     ok = 'ok',
     cancel = 'cancel',
+    unset = 'not set',
     colon = true,
     autoClose = false,
     inner24 = false,
     prevHandle = '<div class="mddtp-prev-handle"></div>',
-    nextHandle = '<div class="mddtp-next-handle"></div>'
+    nextHandle = '<div class="mddtp-next-handle"></div>',
+    container = document.body
   }) {
     this._type = type
     this._init = init
@@ -60,11 +62,13 @@ class mdDateTimePicker {
     this._trigger = trigger
     this._ok = ok
     this._cancel = cancel
+    this._unset = unset
     this._colon = colon
     this._autoClose = autoClose
     this._inner24 = inner24
     this._prevHandle = prevHandle
     this._nextHandle = nextHandle
+    this._container = container
 
     /**
     * [dialog selected classes have the same structure as dialog but one level down]
@@ -78,7 +82,7 @@ class mdDateTimePicker {
     this._sDialog = {}
 
     // attach the dialog if not present
-    if (typeof document !== 'undefined' && !document.getElementById(`mddtp-picker__${this._type}`)) {
+    if (typeof document !== 'undefined' && !this._container.querySelector(`#mddtp-picker__${this._type}`)) {
       this._buildDialog()
     }
   }
@@ -200,18 +204,18 @@ class mdDateTimePicker {
 
   _selectDialog () {
     // now do what you normally would do
-    this._sDialog.picker = document.getElementById(`mddtp-picker__${[this._type]}`)
+    this._sDialog.picker = this._container.querySelector(`#mddtp-picker__${[this._type]}`)
     /**
     * [sDialogEls stores all inner components of the selected dialog or sDialog to be later getElementById]
     *
     * @type {Array}
     */
     const sDialogEls = [
-      'viewHolder', 'years', 'header', 'cancel', 'ok', 'left', 'right', 'previous', 'current', 'next', 'subtitle', 'title', 'titleDay', 'titleMonth', 'AM', 'PM', 'needle', 'hourView', 'minuteView', 'hour', 'minute', 'fakeNeedle', 'circularHolder', 'circle', 'dotSpan'
+      'viewHolder', 'years', 'header', 'unset', 'cancel', 'ok', 'left', 'right', 'previous', 'current', 'next', 'subtitle', 'title', 'titleDay', 'titleMonth', 'AM', 'PM', 'needle', 'hourView', 'minuteView', 'hour', 'minute', 'fakeNeedle', 'circularHolder', 'circle', 'dotSpan'
     ]
     let i = sDialogEls.length
     while (i--) {
-      this._sDialog[sDialogEls[i]] = document.getElementById(`mddtp-${this._type}__${sDialogEls[i]}`)
+      this._sDialog[sDialogEls[i]] = this._container.querySelector(`#mddtp-${this._type}__${sDialogEls[i]}`)
     }
 
     this._sDialog.tDate = this._init.clone()
@@ -318,6 +322,7 @@ class mdDateTimePicker {
     const action = document.createElement('div')
     const cancel = document.createElement('button')
     const ok = document.createElement('button')
+    const unset = document.createElement('button')
     // ... add properties to them
     container.id = `mddtp-picker__${type}`
     container.classList.add('mddtp-picker')
@@ -480,6 +485,9 @@ class mdDateTimePicker {
       action.style.display = 'none'
     }
 
+    this._addId(unset, 'unset')
+    unset.classList.add('mddtp-button')
+    unset.setAttribute('type', 'button')
     this._addId(cancel, 'cancel')
     cancel.classList.add('mddtp-button')
     cancel.setAttribute('type', 'button')
@@ -487,13 +495,14 @@ class mdDateTimePicker {
     ok.classList.add('mddtp-button')
     ok.setAttribute('type', 'button')
     // add actions
+    action.appendChild(unset)
     action.appendChild(cancel)
     action.appendChild(ok)
     // add actions to body
     body.appendChild(action)
     docfrag.appendChild(container)
     // add the container to the end of body
-    document.getElementsByTagName('body').item(0).appendChild(docfrag)
+    this._container.appendChild(docfrag)
   }
 
   /**
@@ -907,7 +916,7 @@ class mdDateTimePicker {
     const years = me._sDialog.years
     const title = me._sDialog.title
     const subtitle = me._sDialog.subtitle
-    const currentYear = document.getElementById('mddtp-date__currentYear')
+    const currentYear = me._container.querySelector('#mddtp-date__currentYear')
     if (mdDateTimePicker.dialog.view) {
       viewHolder.classList.add('zoomOut')
       years.classList.remove('mddtp-picker__years--invisible')
@@ -939,7 +948,7 @@ class mdDateTimePicker {
     const sClass = 'mddtp-picker__cell--selected'
     hourView.onclick = function (e) {
       const sHour = 'mddtp-hour__selected'
-      const selectedHour = document.getElementById(sHour)
+      const selectedHour = me._container.querySelector('#' + sHour)
       let setHour = 0
       if (e.target && e.target.nodeName === 'SPAN') {
         // clear the previously selected hour
@@ -968,7 +977,7 @@ class mdDateTimePicker {
     }
     minuteView.onclick = function (e) {
       const sMinute = 'mddtp-minute__selected'
-      const selectedMinute = document.getElementById(sMinute)
+      const selectedMinute = me._container.querySelector('#' + sMinute)
       let setMinute = 0
       if (e.target && e.target.nodeName === 'SPAN') {
         // clear the previously selected hour
@@ -1001,7 +1010,7 @@ class mdDateTimePicker {
         const currentDate = me._sDialog.tDate.date(day)
         const sId = 'mddtp-date__selected'
         const sClass = 'mddtp-picker__cell--selected'
-        const selected = document.getElementById(sId)
+        const selected = me._container.querySelector('#' + sId)
         const subtitle = me._sDialog.subtitle
         const titleDay = me._sDialog.titleDay
         const titleMonth = me._sDialog.titleMonth
@@ -1146,7 +1155,7 @@ class mdDateTimePicker {
     const me = this
     el.onclick = function (e) {
       if (e.target && e.target.nodeName === 'LI') {
-        const selected = document.getElementById('mddtp-date__currentYear')
+        const selected = me._container.querySelector('#mddtp-date__currentYear')
         // clear previous selected
         selected.id = ''
         selected.classList.remove('mddtp-picker__li--current')
@@ -1277,7 +1286,7 @@ class mdDateTimePicker {
     const onDragEnd = function () {
       const minuteViewChildren = me._sDialog.minuteView.getElementsByTagName('div')
       const sMinute = 'mddtp-minute__selected'
-      const selectedMinute = document.getElementById(sMinute)
+      const selectedMinute = me._container.querySelector('#' + sMinute)
       const cOffset = circle.getBoundingClientRect()
       fakeNeedle.style.left = `left:${cOffset.left - hOffset.left}px`
       fakeNeedle.style.top = `top:${cOffset.top - hOffset.top}px`
@@ -1321,9 +1330,19 @@ class mdDateTimePicker {
     const me = this
     const ok = this._sDialog.ok
     const cancel = this._sDialog.cancel
+    const unset = this._sDialog.unset
+
     // create cutom events to dispatch
     const onCancel = new CustomEvent('onCancel')
     const onOk = new CustomEvent('onOk')
+    const onUnset = new CustomEvent('onUnset')
+
+    unset.onclick = function () {
+      me.toggle()
+      if (me._trigger) {
+        me._trigger.dispatchEvent(onUnset)
+      }
+    }
     cancel.onclick = function () {
       me.toggle()
       if (me._trigger) {
@@ -1346,6 +1365,7 @@ class mdDateTimePicker {
   _setButtonText () {
     this._sDialog.cancel.textContent = this._cancel
     this._sDialog.ok.textContent = this._ok
+    this._sDialog.unset.textContent = this._unset
   }
 
   /**

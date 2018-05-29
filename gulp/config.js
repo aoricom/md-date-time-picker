@@ -57,6 +57,10 @@ module.exports = {
     dark: ': false',
     path: 'light'
   }, {
+    color: 'dark-blue',
+    dark: ': false',
+    path: 'light'
+  }, {
     color: 'blue',
     dark: ': false',
     path: 'light'
@@ -190,4 +194,4 @@ module.exports = {
     dark: ': true',
     path: 'dark'
   }]
-};
+}
