@@ -133,15 +133,18 @@
         -ms-flex-direction: column;
             flex-direction: column;
     padding-top: 56px; }
-    .mddtp-picker__body .mddtp-picker__outer .mddtp-picker__ranger span {
+    .mddtp-picker__body .mddtp-picker__outer .mddtp-picker__ranger .mddtp-picker__range {
       font-size: 14px;
       padding: 8px 16px 8px 8px;
       cursor: pointer; }
-    .mddtp-picker__body .mddtp-picker__outer .mddtp-picker__ranger span:hover {
+    .mddtp-picker__body .mddtp-picker__outer .mddtp-picker__ranger .mddtp-picker__range:hover {
       background-color: #3976d2;
       color: #fff; }
-    .mddtp-picker__body .mddtp-picker__outer .mddtp-picker__ranger span:first-child {
+    .mddtp-picker__body .mddtp-picker__outer .mddtp-picker__ranger .mddtp-picker__range:first-child {
       margin-top: 8px; }
+    .mddtp-picker__body .mddtp-picker__outer .mddtp-picker__ranger .mddtp-picker__range--selected {
+      background-color: #3976d2;
+      color: #fff; }
 
 .mddtp-picker__body .mddtp-picker__viewHolder {
   width: 314px;

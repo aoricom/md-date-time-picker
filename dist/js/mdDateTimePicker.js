@@ -51,6 +51,39 @@
     };
   }();
 
+  var ranges = ['Today', 'Yesterday', 'Last two weeks', 'Current month', 'Previous month', 'All time'],
+      beginAndEnd = [function () {
+    return {
+      begin: (0, _moment2.default)().startOf('day'),
+      end: (0, _moment2.default)()
+    };
+  }, function () {
+    return {
+      begin: (0, _moment2.default)().subtract(1, 'day').startOf('day'),
+      end: (0, _moment2.default)().subtract(1, 'day').endOf('day')
+    };
+  }, function () {
+    return {
+      begin: (0, _moment2.default)().subtract(1, 'week').startOf('week'),
+      end: (0, _moment2.default)()
+    };
+  }, function () {
+    return {
+      begin: (0, _moment2.default)().startOf('month'),
+      end: (0, _moment2.default)()
+    };
+  }, function () {
+    return {
+      begin: (0, _moment2.default)().subtract(1, 'month').startOf('month'),
+      end: (0, _moment2.default)().subtract(1, 'month').endOf('month')
+    };
+  }, function () {
+    return {
+      begin: (0, _moment2.default)().subtract(1, 'month'), // todo
+      end: (0, _moment2.default)()
+    };
+  }];
+
   var mdDateTimePicker = function () {
     /**
     * [constructor of the mdDateTimePicker]
@@ -427,30 +460,17 @@
           this._addClass(outer, 'outer');
           outer.appendChild(inner);
 
-          if (this._range) {
-            var ranger = document.createElement('div'),
-                spans = ['Today', 'Yesterday', 'Last two weeks', 'Current month', 'Previous month', 'All time'];
+          var ranger = document.createElement('div');
+          this._addId(ranger, 'ranger');
+          this._addClass(ranger, 'ranger', ['animated']);
 
-
-            this._addId(ranger, 'ranger');
-
-            for (var i = 0; i < spans.length; i++) {
-              var span = document.createElement('span');
-              span.innerText = spans[i];
-              ranger.appendChild(span);
-            }
-
-            this._addClass(ranger, 'ranger', ['animated']);
-            outer.appendChild(ranger);
-          }
-
+          outer.appendChild(ranger);
           outer.appendChild(years);
-
           body.appendChild(outer);
         } else {
           var _title = document.createElement('div'),
               hour = document.createElement('span'),
-              _span = document.createElement('span'),
+              span = document.createElement('span'),
               minute = document.createElement('span'),
               _subtitle = document.createElement('div'),
               AM = document.createElement('div'),
@@ -470,9 +490,9 @@
           this._addClass(_title, 'title');
           this._addId(hour, 'hour');
           hour.classList.add('mddtp-picker__color--active');
-          _span.textContent = ':';
-          this._addId(_span, 'dotSpan');
-          _span.style.display = 'none';
+          span.textContent = ':';
+          this._addId(span, 'dotSpan');
+          span.style.display = 'none';
           this._addId(minute, 'minute');
           this._addId(_subtitle, 'subtitle');
           this._addClass(_subtitle, 'subtitle');
@@ -487,7 +507,7 @@
           PM.textContent = (0, _moment2.default)().localeData().meridiem(13, 1, !0);
           // add them to title and subtitle
           _title.appendChild(hour);
-          _title.appendChild(_span);
+          _title.appendChild(span);
           _title.appendChild(minute);
           _subtitle.appendChild(AM);
           _subtitle.appendChild(PM);
@@ -643,17 +663,17 @@
           hourNow = parseInt(this._sDialog.tDate.format('h'), 10);
           for (var _i = 1, _j = 10; _i <= 12; _i++, _j += 10) {
             var _div = document.createElement('div'),
-                _span2 = document.createElement('span');
+                _span = document.createElement('span');
 
             _div.classList.add(cell);
-            _span2.textContent = _i;
+            _span.textContent = _i;
             _div.classList.add(rotate + _j);
             if (hourNow === _i) {
               _div.id = hour;
               _div.classList.add(selected);
               needle.classList.add(rotate + _j);
             }
-            _div.appendChild(_span2);
+            _div.appendChild(_span);
             docfrag.appendChild(_div);
           }
         }
@@ -717,6 +737,8 @@
           this._fillText(subtitle, m.format('YYYY'));
           this._fillText(titleDay, '');
           this._fillText(titleMonth, this._begin.format('MMM D, YYYY') + ' - ' + this._end.format('MMM D, YYYY'));
+
+          this._initRange();
         } else {
           this._fillText(subtitle, m.format('YYYY'));
           this._fillText(titleDay, m.format('ddd, '));
@@ -752,6 +774,29 @@
         this._initMonth(next, (0, _moment2.default)(this._getMonth(m, 1)));
         this._initMonth(previous, (0, _moment2.default)(this._getMonth(m, -1)));
         this._toMoveMonth();
+      }
+    }, {
+      key: '_initRange',
+      value: function _initRange() {
+        var ranger = this._sDialog.ranger,
+            frag = new DocumentFragment();
+
+
+        for (var i = 0; i < ranges.length; i++) {
+          var span = document.createElement('span');
+          span.innerText = ranges[i];
+          span.classList.add('mddtp-picker__range');
+          span.setAttribute('idx', i);
+          frag.appendChild(span);
+        }
+
+        while (ranger.lastChild) {
+          ranger.removeChild(ranger.lastChild);
+        }
+
+        ranger.appendChild(frag);
+
+        this._addRangeClickEvent(ranger);
       }
     }, {
       key: '_initMonth',
@@ -829,6 +874,11 @@
 
               if (i >= begin && i <= end) {
                 cell.classList.add(cellClass + '--ranged');
+              }
+
+              if (this._range) {
+                this._addCellMouseEnterEvent(cell);
+                this._addCellMouseLeaveEvent(cell);
               }
             }
 
@@ -1083,6 +1133,99 @@
         };
       }
     }, {
+      key: '_addRangeClickEvent',
+      value: function _addRangeClickEvent(el) {
+        var me = this;
+
+        el.onclick = function (e) {
+          if (e.target && e.target.nodeName === 'SPAN') {
+            var subtitle = me._sDialog.subtitle,
+                titleMonth = me._sDialog.titleMonth,
+                titleDay = me._sDialog.titleDay,
+                sRangeClass = 'mddtp-picker__range--selected',
+                idx = parseInt(e.target.getAttribute('idx')),
+                date = beginAndEnd[idx]();
+
+
+            me._sDialog.tDate = date.begin;
+            me._sDialog.bDate = date.begin;
+            me._sDialog.eDate = date.end;
+
+            me._initViewHolder();
+            me._fillText(subtitle, '' + me._sDialog.tDate.format('YYYY'));
+            me._fillText(titleDay, '');
+            me._fillText(titleMonth, me._sDialog.bDate.format('MMM D, YYYY') + ' - ' + me._sDialog.eDate.format('MMM D, YYYY'));
+
+            me.__endSelected = !0;
+
+            var els = me._sDialog.ranger.children;
+
+            for (var i = 0; i < els.length; i++) {
+              var _el = els[i];
+              if (_el === e.target) {
+                _el.classList.add(sRangeClass);
+              } else {
+                _el.classList.remove(sRangeClass);
+              }
+            }
+          }
+        };
+      }
+    }, {
+      key: '_addCellMouseEnterEvent',
+      value: function _addCellMouseEnterEvent(el) {
+        var me = this;
+
+        el.onmouseenter = function (e) {
+          var target = e.target,
+              day = target.textContent,
+              hoveredDate = me._sDialog.tDate.clone().date(day);
+
+
+          if (!me.__endSelected && hoveredDate.isAfter(me._sDialog.bDate, 'day')) {
+            var rangedClass = 'mddtp-picker__cell--ranged',
+                current = target;
+
+
+            while (current && !current.classList.contains(rangedClass) && current.classList.contains('mddtp-picker__cell')) {
+              current.classList.add(rangedClass);
+              current = current.previousElementSibling;
+            }
+          }
+        };
+      }
+    }, {
+      key: '_addCellMouseLeaveEvent',
+      value: function _addCellMouseLeaveEvent(el) {
+        var me = this;
+
+        el.onmouseleave = function (e) {
+          var target = e.target,
+              day = target.textContent,
+              hoveredDate = me._sDialog.tDate.clone().date(day),
+              bDate = me._sDialog.bDate;
+
+
+          if (!me.__endSelected && hoveredDate.isAfter(bDate, 'day')) {
+            var rangedClass = 'mddtp-picker__cell--ranged',
+                current = target;
+
+
+            if (bDate.isSame(hoveredDate, 'month')) {
+              while (current && current.classList.contains(rangedClass) && current.classList.contains('mddtp-picker__cell') && current.previousElementSibling && current.previousElementSibling.classList.contains(rangedClass)) {
+                current.classList.remove(rangedClass);
+                current = current.previousElementSibling;
+              }
+            } else {
+              while (current && current.classList.contains(rangedClass) && current.classList.contains('mddtp-picker__cell')) {
+                current.classList.remove(rangedClass);
+                current = current.previousElementSibling;
+              }
+            }
+          }
+        };
+      }
+    }, {
       key: '_addCellClickEvent',
       value: function _addCellClickEvent(el) {
         var me = this;
@@ -1094,6 +1237,7 @@
                   day = e.target.textContent,
                   clickedDate = me._sDialog.tDate.date(day),
                   sClass = 'mddtp-picker__cell--selected',
+                  sRangeClass = 'mddtp-picker__range--selected',
                   sId = 'mddtp-date__selected',
                   startId = 'mddtp-date__start',
                   endId = 'mddtp-date__end',
@@ -1136,6 +1280,20 @@
                 e.target.id = endId;
 
                 me.__endSelected = !0;
+
+                var els = me._sDialog.ranger.children;
+
+                for (var i = 0; i < els.length; i++) {
+                  var _el2 = els[i],
+                      date = beginAndEnd[i]();
+
+
+                  if (me._sDialog.bDate.isSame(date.begin, 'day') && me._sDialog.eDate.isSame(date.end, 'day')) {
+                    _el2.classList.add(sRangeClass);
+                  } else {
+                    _el2.classList.remove(sRangeClass);
+                  }
+                }
               }
 
               me._fillText(subtitle, '' + clickedDate.format('YYYY'));

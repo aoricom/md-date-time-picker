@@ -149,17 +149,21 @@
       flex-direction: column;
       padding-top: 56px;
 
-      span {
+      .mddtp-picker__range {
         font-size: 14px;
         padding: 8px 16px 8px 8px;
         cursor: pointer;
       }
-      span:hover {
+      .mddtp-picker__range:hover {
         background-color: $md-button-color;
         color: $picker-body-color;
       }
-      span:first-child {
+      .mddtp-picker__range:first-child {
         margin-top: 8px;
+      }
+      .mddtp-picker__range--selected {
+        background-color: $md-button-color;
+        color: $picker-body-color;
       }
     }
   }

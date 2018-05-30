@@ -12,6 +12,34 @@
 import moment from 'moment'
 import Draggabilly from 'draggabilly'
 
+const ranges = [ 'Today', 'Yesterday', 'Last two weeks', 'Current month', 'Previous month', 'All time' ]
+const beginAndEnd = [
+  () => ({
+    begin: moment().startOf('day'),
+    end: moment()
+  }),
+  () => ({
+    begin: moment().subtract(1, 'day').startOf('day'),
+    end: moment().subtract(1, 'day').endOf('day')
+  }),
+  () => ({
+    begin: moment().subtract(1, 'week').startOf('week'),
+    end: moment()
+  }),
+  () => ({
+    begin: moment().startOf('month'),
+    end: moment()
+  }),
+  () => ({
+    begin: moment().subtract(1, 'month').startOf('month'),
+    end: moment().subtract(1, 'month').endOf('month')
+  }),
+  () => ({
+    begin: moment().subtract(1, 'month'),   // todo
+    end: moment()
+  })
+]
+
 class mdDateTimePicker {
   /**
   * [constructor of the mdDateTimePicker]
@@ -438,24 +466,12 @@ class mdDateTimePicker {
       this._addClass(outer, 'outer')
       outer.appendChild(inner)
 
-      if (this._range) {
-        const ranger = document.createElement('div')
-        const spans = [ 'Today', 'Yesterday', 'Last two weeks', 'Current month', 'Previous month', 'All time' ]
+      const ranger = document.createElement('div')
+      this._addId(ranger, 'ranger')
+      this._addClass(ranger, 'ranger', ['animated'])
 
-        this._addId(ranger, 'ranger')
-
-        for (let i = 0; i < spans.length; i++) {
-          const span = document.createElement('span')
-          span.innerText = spans[i]
-          ranger.appendChild(span)
-        }
-
-        this._addClass(ranger, 'ranger', ['animated'])
-        outer.appendChild(ranger)
-      }
-
+      outer.appendChild(ranger)
       outer.appendChild(years)
-
       body.appendChild(outer)
     } else {
       const title = document.createElement('div')
@@ -723,6 +739,8 @@ class mdDateTimePicker {
       this._fillText(subtitle, m.format('YYYY'))
       this._fillText(titleDay, '')
       this._fillText(titleMonth, `${this._begin.format('MMM D, YYYY')} - ${this._end.format('MMM D, YYYY')}`)
+
+      this._initRange()
     } else {
       this._fillText(subtitle, m.format('YYYY'))
       this._fillText(titleDay, m.format('ddd, '))
@@ -756,6 +774,27 @@ class mdDateTimePicker {
     this._initMonth(next, moment(this._getMonth(m, 1)))
     this._initMonth(previous, moment(this._getMonth(m, -1)))
     this._toMoveMonth()
+  }
+
+  _initRange () {
+    const ranger = this._sDialog.ranger
+    const frag = new DocumentFragment()
+
+    for (let i = 0; i < ranges.length; i++) {
+      const span = document.createElement('span')
+      span.innerText = ranges[i]
+      span.classList.add('mddtp-picker__range')
+      span.setAttribute('idx', i)
+      frag.appendChild(span)
+    }
+
+    while (ranger.lastChild) {
+      ranger.removeChild(ranger.lastChild)
+    }
+
+    ranger.appendChild(frag)
+
+    this._addRangeClickEvent(ranger)
   }
 
   _initMonth (view, m) {
@@ -828,6 +867,11 @@ class mdDateTimePicker {
 
           if (i >= begin && i <= end) {
             cell.classList.add(`${cellClass}--ranged`)
+          }
+
+          if (this._range) {
+            this._addCellMouseEnterEvent(cell)
+            this._addCellMouseLeaveEvent(cell)
           }
         }
 
@@ -1103,6 +1147,92 @@ class mdDateTimePicker {
     }
   }
 
+  _addRangeClickEvent (el) {
+    const me = this
+
+    el.onclick = function (e) {
+      if (e.target && e.target.nodeName === 'SPAN') {
+        const subtitle = me._sDialog.subtitle
+        const titleMonth = me._sDialog.titleMonth
+        const titleDay = me._sDialog.titleDay
+        const sRangeClass = 'mddtp-picker__range--selected'
+
+        const idx = parseInt(e.target.getAttribute('idx'))
+        const date = beginAndEnd[idx]()
+
+        me._sDialog.tDate = date.begin
+        me._sDialog.bDate = date.begin
+        me._sDialog.eDate = date.end
+
+        me._initViewHolder()
+        me._fillText(subtitle, `${me._sDialog.tDate.format('YYYY')}`)
+        me._fillText(titleDay, '')
+        me._fillText(titleMonth, `${me._sDialog.bDate.format('MMM D, YYYY')} - ${me._sDialog.eDate.format('MMM D, YYYY')}`)
+
+        me.__endSelected = true
+
+        const els = me._sDialog.ranger.children
+
+        for (let i = 0; i < els.length; i++) {
+          const el = els[i]
+          if (el === e.target) {
+            el.classList.add(sRangeClass)
+          } else {
+            el.classList.remove(sRangeClass)
+          }
+        }
+      }
+    }
+  }
+
+  _addCellMouseEnterEvent (el) {
+    const me = this
+
+    el.onmouseenter = function (e) {
+      const target = e.target
+      const day = target.textContent
+      const hoveredDate = me._sDialog.tDate.clone().date(day)
+
+      if (!me.__endSelected && hoveredDate.isAfter(me._sDialog.bDate, 'day')) {
+        const rangedClass = 'mddtp-picker__cell--ranged'
+        let current = target
+
+        while (current && !current.classList.contains(rangedClass) && current.classList.contains('mddtp-picker__cell')) {
+          current.classList.add(rangedClass)
+          current = current.previousElementSibling
+        }
+      }
+    }
+  }
+
+  _addCellMouseLeaveEvent (el) {
+    const me = this
+
+    el.onmouseleave = function (e) {
+      const target = e.target
+      const day = target.textContent
+      const hoveredDate = me._sDialog.tDate.clone().date(day)
+      const bDate = me._sDialog.bDate
+
+      if (!me.__endSelected && hoveredDate.isAfter(bDate, 'day')) {
+        const rangedClass = 'mddtp-picker__cell--ranged'
+        let current = target
+
+        if (bDate.isSame(hoveredDate, 'month')) {
+          while (current && current.classList.contains(rangedClass) && current.classList.contains('mddtp-picker__cell') && current.previousElementSibling && current.previousElementSibling.classList.contains(rangedClass)) {
+            current.classList.remove(rangedClass)
+            current = current.previousElementSibling
+          }
+        } else {
+          while (current && current.classList.contains(rangedClass) && current.classList.contains('mddtp-picker__cell')) {
+            current.classList.remove(rangedClass)
+            current = current.previousElementSibling
+          }
+        }
+      }
+    }
+  }
+
   _addCellClickEvent (el) {
     const me = this
     el.onclick = function (e) {
@@ -1113,6 +1243,7 @@ class mdDateTimePicker {
           const day = e.target.textContent
           const clickedDate = me._sDialog.tDate.date(day)
           const sClass = 'mddtp-picker__cell--selected'
+          const sRangeClass = 'mddtp-picker__range--selected'
           const sId = 'mddtp-date__selected'
           const startId = 'mddtp-date__start'
           const endId = 'mddtp-date__end'
@@ -1155,6 +1286,19 @@ class mdDateTimePicker {
             e.target.id = endId
 
             me.__endSelected = true
+
+            const els = me._sDialog.ranger.children
+
+            for (let i = 0; i < els.length; i++) {
+              const el = els[i]
+              const date = beginAndEnd[i]()
+
+              if (me._sDialog.bDate.isSame(date.begin, 'day') && me._sDialog.eDate.isSame(date.end, 'day')) {
+                el.classList.add(sRangeClass)
+              } else {
+                el.classList.remove(sRangeClass)
+              }
+            }
           }
 
           me._fillText(subtitle, `${clickedDate.format('YYYY')}`)
