@@ -106,7 +106,7 @@
     left: 4px;
   }
   .mddtp-picker__right {
-    right: 4px;
+    left: 256px;
   }
   .mddtp-picker__left,
   .mddtp-picker__right {
@@ -137,6 +137,36 @@
   }
 }
 .mddtp-picker__body {
+  .mddtp-picker__outer {
+    display: flex;
+
+    .mddtp-picker__inner {
+
+    }
+
+    .mddtp-picker__ranger {
+      display: flex;
+      flex-direction: column;
+      padding-top: 56px;
+
+      span {
+        font-size: 14px;
+        padding: 8px 16px 8px 8px;
+        cursor: pointer;
+      }
+      span:hover {
+        background-color: $md-button-color;
+        color: $picker-body-color;
+      }
+      span:first-child {
+        margin-top: 8px;
+      }
+    }
+  }
+
+
+
+
   .mddtp-picker__viewHolder {
     width: 314px;
     overflow: hidden;
@@ -193,6 +223,11 @@
         &.mddtp-picker__cell--disabled {
           color: $md-button-color--disabled;
           cursor: not-allowed;
+        }
+        &.mddtp-picker__cell--ranged {
+          border: 1px solid $md-button-color;
+          width: 34px;
+          height: 34px;
         }
       }
       .mddtp-picker__tr {
@@ -418,8 +453,9 @@
 }
 // animation classes
 .mddtp-picker,
-.mddtp-picker__viewHolder,
-.mddtp-picker__years {
+.mddtp-picker__inner,
+.mddtp-picker__years,
+.mddtp-picker__ranger {
   &.zoomIn {
     animation-name: zoomIn;
   }

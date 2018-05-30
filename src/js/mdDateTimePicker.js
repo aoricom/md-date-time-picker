@@ -48,6 +48,10 @@ class mdDateTimePicker {
     unset = 'not set',
     colon = true,
     autoClose = false,
+    alignTo = null,
+    range = false,
+    begin = new Date(),
+    end = new Date(),
     inner24 = false,
     prevHandle = '<div class="mddtp-prev-handle"></div>',
     nextHandle = '<div class="mddtp-next-handle"></div>',
@@ -69,6 +73,10 @@ class mdDateTimePicker {
     this._prevHandle = prevHandle
     this._nextHandle = nextHandle
     this._container = container
+    this._alignTo = alignTo
+    this._range = range
+    this._begin = moment(begin)
+    this._end = moment(end)
 
     /**
     * [dialog selected classes have the same structure as dialog but one level down]
@@ -211,7 +219,7 @@ class mdDateTimePicker {
     * @type {Array}
     */
     const sDialogEls = [
-      'viewHolder', 'years', 'header', 'unset', 'cancel', 'ok', 'left', 'right', 'previous', 'current', 'next', 'subtitle', 'title', 'titleDay', 'titleMonth', 'AM', 'PM', 'needle', 'hourView', 'minuteView', 'hour', 'minute', 'fakeNeedle', 'circularHolder', 'circle', 'dotSpan'
+      'viewHolder', 'years', 'header', 'unset', 'ranger', 'inner', 'cancel', 'ok', 'left', 'right', 'previous', 'current', 'next', 'subtitle', 'title', 'titleDay', 'titleMonth', 'AM', 'PM', 'needle', 'hourView', 'minuteView', 'hour', 'minute', 'fakeNeedle', 'circularHolder', 'circle', 'dotSpan'
     ]
     let i = sDialogEls.length
     while (i--) {
@@ -220,6 +228,11 @@ class mdDateTimePicker {
 
     this._sDialog.tDate = this._init.clone()
     this._sDialog.sDate = this._init.clone()
+
+    if (this._range) {
+      this._sDialog.bDate = this._begin.clone()
+      this._sDialog.eDate = this._end.clone()
+    }
   }
 
   /**
@@ -234,6 +247,16 @@ class mdDateTimePicker {
     mdDateTimePicker.dialog.state = true
     this._sDialog.picker.classList.remove('mddtp-picker--inactive')
     this._sDialog.picker.classList.add(zoomIn)
+
+    if (this._alignTo) {
+      const rect = this._alignTo.getBoundingClientRect()
+      const top = rect.y + rect.height + 8 + ((this._sDialog.picker.offsetHeight) / (2))
+      const left = rect.left + rect.width - this._sDialog.picker.offsetWidth
+
+      this._sDialog.picker.style.top = `${top}px`
+      this._sDialog.picker.style.left = `${left}px`
+    }
+
     // if the dialog is forced into portrait mode
     if (this._orientation === 'PORTRAIT') {
       this._sDialog.picker.classList.add('mddtp-picker--portrait')
@@ -254,7 +277,8 @@ class mdDateTimePicker {
     const years = this._sDialog.years
     const title = me._sDialog.title
     const subtitle = me._sDialog.subtitle
-    const viewHolder = this._sDialog.viewHolder
+    const inner = this._sDialog.inner
+    const ranger = this._sDialog.ranger
     const AM = this._sDialog.AM
     const PM = this._sDialog.PM
     const minute = this._sDialog.minute
@@ -280,7 +304,8 @@ class mdDateTimePicker {
       years.classList.add(invisible)
       title.classList.remove(active)
       subtitle.classList.add(active)
-      viewHolder.classList.remove(zoomOut)
+      inner.classList.remove(zoomOut)
+      ranger && ranger.classList.remove(zoomOut)
     } else {
       AM.classList.remove(active)
       PM.classList.remove(active)
@@ -339,6 +364,8 @@ class mdDateTimePicker {
     container.appendChild(body)
     // add stuff to header and body according to dialog type
     if (this._type === 'date') {
+      const outer = document.createElement('div')
+      const inner = document.createElement('div')
       const subtitle = document.createElement('div')
       const title = document.createElement('div')
       const titleDay = document.createElement('div')
@@ -401,10 +428,35 @@ class mdDateTimePicker {
       this._addId(years, 'years')
       this._addClass(years, 'years', ['mddtp-picker__years--invisible', 'animated'])
       // add them to body
-      body.appendChild(viewHolder)
-      body.appendChild(left)
-      body.appendChild(right)
-      body.appendChild(years)
+
+      this._addClass(inner, 'inner', ['animated'])
+      this._addId(inner, 'inner')
+      inner.appendChild(viewHolder)
+      inner.appendChild(left)
+      inner.appendChild(right)
+
+      this._addClass(outer, 'outer')
+      outer.appendChild(inner)
+
+      if (this._range) {
+        const ranger = document.createElement('div')
+        const spans = [ 'Today', 'Yesterday', 'Last two weeks', 'Current month', 'Previous month', 'All time' ]
+
+        this._addId(ranger, 'ranger')
+
+        for (let i = 0; i < spans.length; i++) {
+          const span = document.createElement('span')
+          span.innerText = spans[i]
+          ranger.appendChild(span)
+        }
+
+        this._addClass(ranger, 'ranger', ['animated'])
+        outer.appendChild(ranger)
+      }
+
+      outer.appendChild(years)
+
+      body.appendChild(outer)
     } else {
       const title = document.createElement('div')
       const hour = document.createElement('span')
@@ -495,7 +547,7 @@ class mdDateTimePicker {
     ok.classList.add('mddtp-button')
     ok.setAttribute('type', 'button')
     // add actions
-    action.appendChild(unset)
+    this._unset && action.appendChild(unset)
     action.appendChild(cancel)
     action.appendChild(ok)
     // add actions to body
@@ -666,9 +718,17 @@ class mdDateTimePicker {
     const title = this._sDialog.title
     const titleDay = this._sDialog.titleDay
     const titleMonth = this._sDialog.titleMonth
-    this._fillText(subtitle, m.format('YYYY'))
-    this._fillText(titleDay, m.format('ddd, '))
-    this._fillText(titleMonth, m.format('MMM D'))
+
+    if (this._range) {
+      this._fillText(subtitle, m.format('YYYY'))
+      this._fillText(titleDay, '')
+      this._fillText(titleMonth, `${this._begin.format('MMM D, YYYY')} - ${this._end.format('MMM D, YYYY')}`)
+    } else {
+      this._fillText(subtitle, m.format('YYYY'))
+      this._fillText(titleDay, m.format('ddd, '))
+      this._fillText(titleMonth, m.format('MMM D'))
+    }
+
     this._initYear()
     this._initViewHolder()
     this._attachEventHandlers()
@@ -712,10 +772,13 @@ class mdDateTimePicker {
     */
     let today = -1
     let selected = -1
+    let begin = 101
+    let end = -1
     const lastDayOfMonth = parseInt(moment(m).endOf('month').format('D'), 10) + firstDayOfMonth - 1
     let past = firstDayOfMonth
     const cellClass = 'mddtp-picker__cell'
     let future = lastDayOfMonth
+
     if (moment().isSame(m, 'month')) {
       today = parseInt(moment().format('D'), 10)
       today += firstDayOfMonth - 1
@@ -728,29 +791,58 @@ class mdDateTimePicker {
       future = parseInt(this._future.format('D'), 10)
       future += firstDayOfMonth - 1
     }
-    if (this._sDialog.sDate.isSame(m, 'month')) {
+    if (!this._range && this._sDialog.sDate.isSame(m, 'month')) {
       selected = parseInt(moment(m).format('D'), 10)
       selected += firstDayOfMonth - 1
     }
+
+    if (this._range) {
+      if (this._sDialog.bDate.isBefore(m, 'month') && this._sDialog.eDate.isSameOrAfter(m, 'month')) {
+        begin = 0
+      } else if (this._sDialog.bDate.isSame(m, 'month')) {
+        begin = this._sDialog.bDate.date()
+        begin += firstDayOfMonth - 1
+      }
+
+      if (this._sDialog.eDate.isAfter(m, 'month') && this._sDialog.bDate.isSameOrBefore(m, 'month')) {
+        end = 42
+      } else if (this._sDialog.eDate.isSame(m, 'month')) {
+        end = this._sDialog.eDate.date()
+        end += firstDayOfMonth - 1
+      }
+
+      begin = begin !== 101 || end === -1 ? begin : 0
+      end = end !== -1 || begin !== 101 ? end : 42
+    }
+
     for (let i = 0; i < 42; i++) {
       // create cell
       const cell = document.createElement('span')
       const currentDay = i - firstDayOfMonth + 1
+
       if ((i >= firstDayOfMonth) && (i <= lastDayOfMonth)) {
         if (i > future || i < past) {
           cell.classList.add(`${cellClass}--disabled`)
         } else {
           cell.classList.add(cellClass)
+
+          if (i >= begin && i <= end) {
+            cell.classList.add(`${cellClass}--ranged`)
+          }
         }
+
         this._fillText(cell, currentDay)
       }
+
       if (today === i) {
         cell.classList.add(`${cellClass}--today`)
       }
+
       if (selected === i) {
         cell.classList.add(`${cellClass}--selected`)
         cell.id = 'mddtp-date__selected'
       }
+
       docfrag.appendChild(cell)
     }
     // empty the tr
@@ -912,25 +1004,34 @@ class mdDateTimePicker {
   */
   _switchToDateView (el, me) {
     el.setAttribute('disabled', '')
-    const viewHolder = me._sDialog.viewHolder
+    const inner = me._sDialog.inner
+    const ranger = me._sDialog.ranger
     const years = me._sDialog.years
     const title = me._sDialog.title
     const subtitle = me._sDialog.subtitle
     const currentYear = me._container.querySelector('#mddtp-date__currentYear')
     if (mdDateTimePicker.dialog.view) {
-      viewHolder.classList.add('zoomOut')
+      inner.classList.add('zoomOut')
+      ranger && ranger.classList.add('zoomOut')
       years.classList.remove('mddtp-picker__years--invisible')
       years.classList.add('zoomIn')
       // scroll into the view
       currentYear.scrollIntoViewIfNeeded && currentYear.scrollIntoViewIfNeeded()
     } else {
       years.classList.add('zoomOut')
-      viewHolder.classList.remove('zoomOut')
-      viewHolder.classList.add('zoomIn')
+      inner.classList.remove('zoomOut')
+      inner.classList.add('zoomIn')
+
+      if (ranger) {
+        ranger.classList.remove('zoomOut')
+        ranger.classList.add('zoomIn')
+      }
+
       setTimeout(() => {
         years.classList.remove('zoomIn', 'zoomOut')
         years.classList.add('mddtp-picker__years--invisible')
-        viewHolder.classList.remove('zoomIn')
+        inner.classList.remove('zoomIn')
+        ranger && ranger.classList.remove('zoomIn')
       }, 300)
     }
     title.classList.toggle('mddtp-picker__color--active')
@@ -1006,30 +1107,87 @@ class mdDateTimePicker {
     const me = this
     el.onclick = function (e) {
       if (e.target && e.target.nodeName === 'SPAN' && e.target.classList.contains('mddtp-picker__cell')) {
-        const day = e.target.textContent
-        const currentDate = me._sDialog.tDate.date(day)
-        const sId = 'mddtp-date__selected'
-        const sClass = 'mddtp-picker__cell--selected'
-        const selected = me._container.querySelector('#' + sId)
-        const subtitle = me._sDialog.subtitle
-        const titleDay = me._sDialog.titleDay
-        const titleMonth = me._sDialog.titleMonth
-        if (selected) {
-          selected.classList.remove(sClass)
-          selected.id = ''
-        }
-        e.target.classList.add(sClass)
-        e.target.id = sId
 
-        // update temp date object with the date selected
-        me._sDialog.sDate = currentDate.clone()
+        if (me._range) {
+          const start = me._sDialog.bDate
+          const day = e.target.textContent
+          const clickedDate = me._sDialog.tDate.date(day)
+          const sClass = 'mddtp-picker__cell--selected'
+          const sId = 'mddtp-date__selected'
+          const startId = 'mddtp-date__start'
+          const endId = 'mddtp-date__end'
 
-        me._fillText(subtitle, currentDate.year())
-        me._fillText(titleDay, currentDate.format('ddd, '))
-        me._fillText(titleMonth, currentDate.format('MMM D'))
+          const subtitle = me._sDialog.subtitle
+          const titleMonth = me._sDialog.titleMonth
+          const titleDay = me._sDialog.titleDay
 
-        if (me._autoClose === true) {
-          me._sDialog.ok.onclick()
+          const selected = me._container.querySelector('#' + sId)
+
+          if (selected) {
+            selected.classList.remove(sClass)
+            selected.id = ''
+          }
+
+          if (!moment.isMoment(start) || clickedDate.isBefore(start) || me.__endSelected) {
+            const startEl = me._container.querySelector('#' + startId)
+            const endEl = me._container.querySelector('#' + endId)
+
+            if (startEl) {
+              startEl.classList.remove(sClass)
+              startEl.id = ''
+            }
+
+            if (endEl) {
+              endEl.classList.remove(sClass)
+              endEl.id = ''
+            }
+
+            me._sDialog.bDate = clickedDate.clone()
+            me._sDialog.eDate = clickedDate.clone()
+
+            e.target.classList.add(sClass)
+            e.target.id = startId
+
+            me.__endSelected = false
+          } else {
+            me._sDialog.eDate = clickedDate.clone()
+            e.target.classList.add(sClass)
+            e.target.id = endId
+
+            me.__endSelected = true
+          }
+
+          me._fillText(subtitle, `${clickedDate.format('YYYY')}`)
+          me._fillText(titleDay, '')
+          me._fillText(titleMonth, `${me._sDialog.bDate.format('MMM D, YYYY')} - ${me._sDialog.eDate.format('MMM D, YYYY')}`)
+
+          me._initViewHolder()
+        } else {
+          const day = e.target.textContent
+          const currentDate = me._sDialog.tDate.date(day)
+          const sId = 'mddtp-date__selected'
+          const sClass = 'mddtp-picker__cell--selected'
+          const selected = me._container.querySelector('#' + sId)
+          const subtitle = me._sDialog.subtitle
+          const titleDay = me._sDialog.titleDay
+          const titleMonth = me._sDialog.titleMonth
+          if (selected) {
+            selected.classList.remove(sClass)
+            selected.id = ''
+          }
+          e.target.classList.add(sClass)
+          e.target.id = sId
+
+          // update temp date object with the date selected
+          me._sDialog.sDate = currentDate.clone()
+
+          me._fillText(subtitle, currentDate.year())
+          me._fillText(titleDay, currentDate.format('ddd, '))
+          me._fillText(titleMonth, currentDate.format('MMM D'))
+
+          if (me._autoClose === true) {
+            me._sDialog.ok.onclick()
+          }
         }
       }
     }
@@ -1156,6 +1314,7 @@ class mdDateTimePicker {
     el.onclick = function (e) {
       if (e.target && e.target.nodeName === 'LI') {
         const selected = me._container.querySelector('#mddtp-date__currentYear')
+        const subtitle = me._sDialog.subtitle
         // clear previous selected
         selected.id = ''
         selected.classList.remove('mddtp-picker__li--current')
@@ -1167,6 +1326,7 @@ class mdDateTimePicker {
         // set the tdate to it
         me._sDialog.tDate.year(parseInt(e.target.textContent, 10))
         // update the dialog
+        me._fillText(subtitle, `${me._sDialog.tDate.format('YYYY')}`)
         me._initViewHolder()
       }
     }
@@ -1337,12 +1497,15 @@ class mdDateTimePicker {
     const onOk = new CustomEvent('onOk')
     const onUnset = new CustomEvent('onUnset')
 
-    unset.onclick = function () {
-      me.toggle()
-      if (me._trigger) {
-        me._trigger.dispatchEvent(onUnset)
+    if (unset) {
+      unset.onclick = function () {
+        me.toggle()
+        if (me._trigger) {
+          me._trigger.dispatchEvent(onUnset)
+        }
       }
     }
+
     cancel.onclick = function () {
       me.toggle()
       if (me._trigger) {
@@ -1350,6 +1513,8 @@ class mdDateTimePicker {
       }
     }
     ok.onclick = function () {
+      me._begin = me._sDialog.bDate
+      me._end = me._sDialog.eDate
       me._init = me._sDialog.sDate
       me.toggle()
       if (me._trigger) {
@@ -1365,7 +1530,10 @@ class mdDateTimePicker {
   _setButtonText () {
     this._sDialog.cancel.textContent = this._cancel
     this._sDialog.ok.textContent = this._ok
-    this._sDialog.unset.textContent = this._unset
+
+    if (this._unset) {
+      this._sDialog.unset.textContent = this._unset
+    }
   }
 
   /**

@@ -98,6 +98,14 @@
           colon = _ref$colon === undefined ? !0 : _ref$colon,
           _ref$autoClose = _ref.autoClose,
           autoClose = _ref$autoClose === undefined ? !1 : _ref$autoClose,
+          _ref$alignTo = _ref.alignTo,
+          alignTo = _ref$alignTo === undefined ? null : _ref$alignTo,
+          _ref$range = _ref.range,
+          range = _ref$range === undefined ? !1 : _ref$range,
+          _ref$begin = _ref.begin,
+          begin = _ref$begin === undefined ? new Date() : _ref$begin,
+          _ref$end = _ref.end,
+          end = _ref$end === undefined ? new Date() : _ref$end,
           _ref$inner = _ref.inner24,
           inner24 = _ref$inner === undefined ? !1 : _ref$inner,
           _ref$prevHandle = _ref.prevHandle,
@@ -125,6 +133,10 @@
       this._prevHandle = prevHandle;
       this._nextHandle = nextHandle;
       this._container = container;
+      this._alignTo = alignTo;
+      this._range = range;
+      this._begin = (0, _moment2.default)(begin);
+      this._end = (0, _moment2.default)(end);
 
       /**
       * [dialog selected classes have the same structure as dialog but one level down]
@@ -203,7 +215,7 @@
         *
         * @type {Array}
         */
-        var sDialogEls = ['viewHolder', 'years', 'header', 'unset', 'cancel', 'ok', 'left', 'right', 'previous', 'current', 'next', 'subtitle', 'title', 'titleDay', 'titleMonth', 'AM', 'PM', 'needle', 'hourView', 'minuteView', 'hour', 'minute', 'fakeNeedle', 'circularHolder', 'circle', 'dotSpan'],
+        var sDialogEls = ['viewHolder', 'years', 'header', 'unset', 'ranger', 'inner', 'cancel', 'ok', 'left', 'right', 'previous', 'current', 'next', 'subtitle', 'title', 'titleDay', 'titleMonth', 'AM', 'PM', 'needle', 'hourView', 'minuteView', 'hour', 'minute', 'fakeNeedle', 'circularHolder', 'circle', 'dotSpan'],
             i = sDialogEls.length;
 
         while (i--) {
@@ -212,6 +224,11 @@
 
         this._sDialog.tDate = this._init.clone();
         this._sDialog.sDate = this._init.clone();
+
+        if (this._range) {
+          this._sDialog.bDate = this._begin.clone();
+          this._sDialog.eDate = this._end.clone();
+        }
       }
     }, {
       key: '_showDialog',
@@ -222,6 +239,17 @@
         mdDateTimePicker.dialog.state = !0;
         this._sDialog.picker.classList.remove('mddtp-picker--inactive');
         this._sDialog.picker.classList.add(zoomIn);
+
+        if (this._alignTo) {
+          var rect = this._alignTo.getBoundingClientRect(),
+              top = rect.y + rect.height + 8 + this._sDialog.picker.offsetHeight / 2,
+              left = rect.left + rect.width - this._sDialog.picker.offsetWidth;
+
+
+          this._sDialog.picker.style.top = top + 'px';
+          this._sDialog.picker.style.left = left + 'px';
+        }
+
         // if the dialog is forced into portrait mode
         if (this._orientation === 'PORTRAIT') {
           this._sDialog.picker.classList.add('mddtp-picker--portrait');
@@ -237,7 +265,8 @@
             years = this._sDialog.years,
             title = me._sDialog.title,
             subtitle = me._sDialog.subtitle,
-            viewHolder = this._sDialog.viewHolder,
+            inner = this._sDialog.inner,
+            ranger = this._sDialog.ranger,
             AM = this._sDialog.AM,
             PM = this._sDialog.PM,
             minute = this._sDialog.minute,
@@ -264,7 +293,8 @@
           years.classList.add(invisible);
           title.classList.remove(active);
           subtitle.classList.add(active);
-          viewHolder.classList.remove(zoomOut);
+          inner.classList.remove(zoomOut);
+          ranger && ranger.classList.remove(zoomOut);
         } else {
           AM.classList.remove(active);
           PM.classList.remove(active);
@@ -322,7 +352,9 @@
         container.appendChild(body);
         // add stuff to header and body according to dialog type
         if (this._type === 'date') {
-          var subtitle = document.createElement('div'),
+          var outer = document.createElement('div'),
+              inner = document.createElement('div'),
+              subtitle = document.createElement('div'),
               title = document.createElement('div'),
               titleDay = document.createElement('div'),
               titleMonth = document.createElement('div'),
@@ -385,14 +417,40 @@
           this._addId(years, 'years');
           this._addClass(years, 'years', ['mddtp-picker__years--invisible', 'animated']);
           // add them to body
-          body.appendChild(viewHolder);
-          body.appendChild(left);
-          body.appendChild(right);
-          body.appendChild(years);
+
+          this._addClass(inner, 'inner', ['animated']);
+          this._addId(inner, 'inner');
+          inner.appendChild(viewHolder);
+          inner.appendChild(left);
+          inner.appendChild(right);
+
+          this._addClass(outer, 'outer');
+          outer.appendChild(inner);
+
+          if (this._range) {
+            var ranger = document.createElement('div'),
+                spans = ['Today', 'Yesterday', 'Last two weeks', 'Current month', 'Previous month', 'All time'];
+
+
+            this._addId(ranger, 'ranger');
+
+            for (var i = 0; i < spans.length; i++) {
+              var span = document.createElement('span');
+              span.innerText = spans[i];
+              ranger.appendChild(span);
+            }
+
+            this._addClass(ranger, 'ranger', ['animated']);
+            outer.appendChild(ranger);
+          }
+
+          outer.appendChild(years);
+
+          body.appendChild(outer);
         } else {
           var _title = document.createElement('div'),
               hour = document.createElement('span'),
-              span = document.createElement('span'),
+              _span = document.createElement('span'),
               minute = document.createElement('span'),
               _subtitle = document.createElement('div'),
               AM = document.createElement('div'),
@@ -412,9 +470,9 @@
           this._addClass(_title, 'title');
           this._addId(hour, 'hour');
           hour.classList.add('mddtp-picker__color--active');
-          span.textContent = ':';
-          this._addId(span, 'dotSpan');
-          span.style.display = 'none';
+          _span.textContent = ':';
+          this._addId(_span, 'dotSpan');
+          _span.style.display = 'none';
           this._addId(minute, 'minute');
           this._addId(_subtitle, 'subtitle');
           this._addClass(_subtitle, 'subtitle');
@@ -429,7 +487,7 @@
           PM.textContent = (0, _moment2.default)().localeData().meridiem(13, 1, !0);
           // add them to title and subtitle
           _title.appendChild(hour);
-          _title.appendChild(span);
+          _title.appendChild(_span);
           _title.appendChild(minute);
           _subtitle.appendChild(AM);
           _subtitle.appendChild(PM);
@@ -480,7 +538,7 @@
         ok.classList.add('mddtp-button');
         ok.setAttribute('type', 'button');
         // add actions
-        action.appendChild(unset);
+        this._unset && action.appendChild(unset);
         action.appendChild(cancel);
         action.appendChild(ok);
         // add actions to body
@@ -585,17 +643,17 @@
           hourNow = parseInt(this._sDialog.tDate.format('h'), 10);
           for (var _i = 1, _j = 10; _i <= 12; _i++, _j += 10) {
             var _div = document.createElement('div'),
-                _span = document.createElement('span');
+                _span2 = document.createElement('span');
 
             _div.classList.add(cell);
-            _span.textContent = _i;
+            _span2.textContent = _i;
             _div.classList.add(rotate + _j);
             if (hourNow === _i) {
               _div.id = hour;
               _div.classList.add(selected);
               needle.classList.add(rotate + _j);
             }
-            _div.appendChild(_span);
+            _div.appendChild(_span2);
             docfrag.appendChild(_div);
           }
         }
@@ -654,9 +712,17 @@
             titleDay = this._sDialog.titleDay,
             titleMonth = this._sDialog.titleMonth;
 
-        this._fillText(subtitle, m.format('YYYY'));
-        this._fillText(titleDay, m.format('ddd, '));
-        this._fillText(titleMonth, m.format('MMM D'));
+
+        if (this._range) {
+          this._fillText(subtitle, m.format('YYYY'));
+          this._fillText(titleDay, '');
+          this._fillText(titleMonth, this._begin.format('MMM D, YYYY') + ' - ' + this._end.format('MMM D, YYYY'));
+        } else {
+          this._fillText(subtitle, m.format('YYYY'));
+          this._fillText(titleDay, m.format('ddd, '));
+          this._fillText(titleMonth, m.format('MMM D'));
+        }
+
         this._initYear();
         this._initViewHolder();
         this._attachEventHandlers();
@@ -700,6 +766,8 @@
             firstDayOfMonth = _moment2.default.weekdays(!0).indexOf(_moment2.default.weekdays(!1, (0, _moment2.default)(m).date(1).day())),
             today = -1,
             selected = -1,
+            begin = 101,
+            end = -1,
             lastDayOfMonth = parseInt((0, _moment2.default)(m).endOf('month').format('D'), 10) + firstDayOfMonth - 1,
             past = firstDayOfMonth,
             cellClass = 'mddtp-picker__cell',
@@ -709,6 +777,7 @@
         /*
         * @netTrek - first day of month dependented from moment.locale
         */
+
 
         if ((0, _moment2.default)().isSame(m, 'month')) {
           today = parseInt((0, _moment2.default)().format('D'), 10);
@@ -722,30 +791,59 @@
           future = parseInt(this._future.format('D'), 10);
           future += firstDayOfMonth - 1;
         }
-        if (this._sDialog.sDate.isSame(m, 'month')) {
+        if (!this._range && this._sDialog.sDate.isSame(m, 'month')) {
           selected = parseInt((0, _moment2.default)(m).format('D'), 10);
           selected += firstDayOfMonth - 1;
         }
+
+        if (this._range) {
+          if (this._sDialog.bDate.isBefore(m, 'month') && this._sDialog.eDate.isSameOrAfter(m, 'month')) {
+            begin = 0;
+          } else if (this._sDialog.bDate.isSame(m, 'month')) {
+            begin = this._sDialog.bDate.date();
+            begin += firstDayOfMonth - 1;
+          }
+
+          if (this._sDialog.eDate.isAfter(m, 'month') && this._sDialog.bDate.isSameOrBefore(m, 'month')) {
+            end = 42;
+          } else if (this._sDialog.eDate.isSame(m, 'month')) {
+            end = this._sDialog.eDate.date();
+            end += firstDayOfMonth - 1;
+          }
+
+          begin = begin !== 101 || end === -1 ? begin : 0;
+          end = end !== -1 || begin !== 101 ? end : 42;
+        }
+
         for (var i = 0; i < 42; i++) {
           // create cell
           var cell = document.createElement('span'),
               currentDay = i - firstDayOfMonth + 1;
+
 
           if (i >= firstDayOfMonth && i <= lastDayOfMonth) {
             if (i > future || i < past) {
               cell.classList.add(cellClass + '--disabled');
             } else {
               cell.classList.add(cellClass);
+
+              if (i >= begin && i <= end) {
+                cell.classList.add(cellClass + '--ranged');
+              }
             }
+
             this._fillText(cell, currentDay);
           }
+
           if (today === i) {
             cell.classList.add(cellClass + '--today');
           }
+
           if (selected === i) {
             cell.classList.add(cellClass + '--selected');
             cell.id = 'mddtp-date__selected';
           }
+
           docfrag.appendChild(cell);
         }
         // empty the tr
@@ -881,26 +979,35 @@
       key: '_switchToDateView',
       value: function _switchToDateView(el, me) {
         el.setAttribute('disabled', '');
-        var viewHolder = me._sDialog.viewHolder,
+        var inner = me._sDialog.inner,
+            ranger = me._sDialog.ranger,
             years = me._sDialog.years,
             title = me._sDialog.title,
             subtitle = me._sDialog.subtitle,
             currentYear = me._container.querySelector('#mddtp-date__currentYear');
 
         if (mdDateTimePicker.dialog.view) {
-          viewHolder.classList.add('zoomOut');
+          inner.classList.add('zoomOut');
+          ranger && ranger.classList.add('zoomOut');
           years.classList.remove('mddtp-picker__years--invisible');
           years.classList.add('zoomIn');
           // scroll into the view
           currentYear.scrollIntoViewIfNeeded && currentYear.scrollIntoViewIfNeeded();
         } else {
           years.classList.add('zoomOut');
-          viewHolder.classList.remove('zoomOut');
-          viewHolder.classList.add('zoomIn');
+          inner.classList.remove('zoomOut');
+          inner.classList.add('zoomIn');
+
+          if (ranger) {
+            ranger.classList.remove('zoomOut');
+            ranger.classList.add('zoomIn');
+          }
+
           setTimeout(function () {
             years.classList.remove('zoomIn', 'zoomOut');
             years.classList.add('mddtp-picker__years--invisible');
-            viewHolder.classList.remove('zoomIn');
+            inner.classList.remove('zoomIn');
+            ranger && ranger.classList.remove('zoomIn');
           }, 300);
         }
         title.classList.toggle('mddtp-picker__color--active');
@@ -981,31 +1088,88 @@
         var me = this;
         el.onclick = function (e) {
           if (e.target && e.target.nodeName === 'SPAN' && e.target.classList.contains('mddtp-picker__cell')) {
-            var day = e.target.textContent,
-                currentDate = me._sDialog.tDate.date(day),
-                sId = 'mddtp-date__selected',
-                sClass = 'mddtp-picker__cell--selected',
-                selected = me._container.querySelector('#' + sId),
-                subtitle = me._sDialog.subtitle,
-                titleDay = me._sDialog.titleDay,
-                titleMonth = me._sDialog.titleMonth;
 
-            if (selected) {
-              selected.classList.remove(sClass);
-              selected.id = '';
-            }
-            e.target.classList.add(sClass);
-            e.target.id = sId;
+            if (me._range) {
+              var start = me._sDialog.bDate,
+                  day = e.target.textContent,
+                  clickedDate = me._sDialog.tDate.date(day),
+                  sClass = 'mddtp-picker__cell--selected',
+                  sId = 'mddtp-date__selected',
+                  startId = 'mddtp-date__start',
+                  endId = 'mddtp-date__end',
+                  subtitle = me._sDialog.subtitle,
+                  titleMonth = me._sDialog.titleMonth,
+                  titleDay = me._sDialog.titleDay,
+                  selected = me._container.querySelector('#' + sId);
 
-            // update temp date object with the date selected
-            me._sDialog.sDate = currentDate.clone();
 
-            me._fillText(subtitle, currentDate.year());
-            me._fillText(titleDay, currentDate.format('ddd, '));
-            me._fillText(titleMonth, currentDate.format('MMM D'));
+              if (selected) {
+                selected.classList.remove(sClass);
+                selected.id = '';
+              }
 
-            if (me._autoClose === !0) {
-              me._sDialog.ok.onclick();
+              if (!_moment2.default.isMoment(start) || clickedDate.isBefore(start) || me.__endSelected) {
+                var startEl = me._container.querySelector('#' + startId),
+                    endEl = me._container.querySelector('#' + endId);
+
+
+                if (startEl) {
+                  startEl.classList.remove(sClass);
+                  startEl.id = '';
+                }
+
+                if (endEl) {
+                  endEl.classList.remove(sClass);
+                  endEl.id = '';
+                }
+
+                me._sDialog.bDate = clickedDate.clone();
+                me._sDialog.eDate = clickedDate.clone();
+
+                e.target.classList.add(sClass);
+                e.target.id = startId;
+
+                me.__endSelected = !1;
+              } else {
+                me._sDialog.eDate = clickedDate.clone();
+                e.target.classList.add(sClass);
+                e.target.id = endId;
+
+                me.__endSelected = !0;
+              }
+
+              me._fillText(subtitle, '' + clickedDate.format('YYYY'));
+              me._fillText(titleDay, '');
+              me._fillText(titleMonth, me._sDialog.bDate.format('MMM D, YYYY') + ' - ' + me._sDialog.eDate.format('MMM D, YYYY'));
+
+              me._initViewHolder();
+            } else {
+              var _day = e.target.textContent,
+                  currentDate = me._sDialog.tDate.date(_day),
+                  _sId = 'mddtp-date__selected',
+                  _sClass = 'mddtp-picker__cell--selected',
+                  _selected = me._container.querySelector('#' + _sId),
+                  _subtitle2 = me._sDialog.subtitle,
+                  _titleDay = me._sDialog.titleDay,
+                  _titleMonth = me._sDialog.titleMonth;
+
+              if (_selected) {
+                _selected.classList.remove(_sClass);
+                _selected.id = '';
+              }
+              e.target.classList.add(_sClass);
+              e.target.id = _sId;
+
+              // update temp date object with the date selected
+              me._sDialog.sDate = currentDate.clone();
+
+              me._fillText(_subtitle2, currentDate.year());
+              me._fillText(_titleDay, currentDate.format('ddd, '));
+              me._fillText(_titleMonth, currentDate.format('MMM D'));
+
+              if (me._autoClose === !0) {
+                me._sDialog.ok.onclick();
+              }
             }
           }
         };
@@ -1130,7 +1294,9 @@
         var me = this;
         el.onclick = function (e) {
           if (e.target && e.target.nodeName === 'LI') {
-            var selected = me._container.querySelector('#mddtp-date__currentYear');
+            var selected = me._container.querySelector('#mddtp-date__currentYear'),
+                subtitle = me._sDialog.subtitle;
+
             // clear previous selected
             selected.id = '';
             selected.classList.remove('mddtp-picker__li--current');
@@ -1142,6 +1308,7 @@
             // set the tdate to it
             me._sDialog.tDate.year(parseInt(e.target.textContent, 10));
             // update the dialog
+            me._fillText(subtitle, '' + me._sDialog.tDate.format('YYYY'));
             me._initViewHolder();
           }
         };
@@ -1308,12 +1475,15 @@
         // create cutom events to dispatch
 
 
-        unset.onclick = function () {
-          me.toggle();
-          if (me._trigger) {
-            me._trigger.dispatchEvent(onUnset);
-          }
-        };
+        if (unset) {
+          unset.onclick = function () {
+            me.toggle();
+            if (me._trigger) {
+              me._trigger.dispatchEvent(onUnset);
+            }
+          };
+        }
+
         cancel.onclick = function () {
           me.toggle();
           if (me._trigger) {
@@ -1321,6 +1491,8 @@
           }
         };
         ok.onclick = function () {
+          me._begin = me._sDialog.bDate;
+          me._end = me._sDialog.eDate;
           me._init = me._sDialog.sDate;
           me.toggle();
           if (me._trigger) {
@@ -1333,7 +1505,10 @@
       value: function _setButtonText() {
         this._sDialog.cancel.textContent = this._cancel;
         this._sDialog.ok.textContent = this._ok;
-        this._sDialog.unset.textContent = this._unset;
+
+        if (this._unset) {
+          this._sDialog.unset.textContent = this._unset;
+        }
       }
     }, {
       key: '_getMonth',
