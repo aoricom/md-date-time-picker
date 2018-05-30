@@ -781,12 +781,20 @@ class mdDateTimePicker {
     const frag = new DocumentFragment()
 
     for (let i = 0; i < ranges.length; i++) {
+      const date = beginAndEnd[i]()
+      const sRangeClass = 'mddtp-picker__range--selected'
       const span = document.createElement('span')
       span.innerText = ranges[i]
       span.classList.add('mddtp-picker__range')
       span.setAttribute('idx', i)
       frag.appendChild(span)
+
+      if (this._sDialog.bDate.isSame(date.begin, 'day') && this._sDialog.eDate.isSame(date.end, 'day')) {
+        span.classList.add(sRangeClass)
+      }
     }
+
+    this.__endSelected = true
 
     while (ranger.lastChild) {
       ranger.removeChild(ranger.lastChild)
@@ -1378,6 +1386,7 @@ class mdDateTimePicker {
       *
       * @type {Boolean}
       */
+
       let stepBack = false
       let next = me._sDialog.next
       let current = me._sDialog.current

@@ -783,12 +783,21 @@
 
 
         for (var i = 0; i < ranges.length; i++) {
-          var span = document.createElement('span');
+          var date = beginAndEnd[i](),
+              sRangeClass = 'mddtp-picker__range--selected',
+              span = document.createElement('span');
+
           span.innerText = ranges[i];
           span.classList.add('mddtp-picker__range');
           span.setAttribute('idx', i);
           frag.appendChild(span);
+
+          if (this._sDialog.bDate.isSame(date.begin, 'day') && this._sDialog.eDate.isSame(date.end, 'day')) {
+            span.classList.add(sRangeClass);
+          }
         }
+
+        this.__endSelected = !0;
 
         while (ranger.lastChild) {
           ranger.removeChild(ranger.lastChild);
@@ -1378,6 +1387,7 @@
           *
           * @type {Boolean}
           */
+
           var stepBack = !1,
               next = me._sDialog.next,
               current = me._sDialog.current,
