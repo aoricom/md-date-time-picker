@@ -12,34 +12,6 @@
 import moment from 'moment'
 import Draggabilly from 'draggabilly'
 
-const ranges = [ 'Today', 'Yesterday', 'Last two weeks', 'Current month', 'Previous month', 'All time' ]
-const beginAndEnd = [
-  () => ({
-    begin: moment().startOf('day'),
-    end: moment()
-  }),
-  () => ({
-    begin: moment().subtract(1, 'day').startOf('day'),
-    end: moment().subtract(1, 'day').endOf('day')
-  }),
-  () => ({
-    begin: moment().subtract(1, 'week').startOf('week'),
-    end: moment()
-  }),
-  () => ({
-    begin: moment().startOf('month'),
-    end: moment()
-  }),
-  () => ({
-    begin: moment().subtract(1, 'month').startOf('month'),
-    end: moment().subtract(1, 'month').endOf('month')
-  }),
-  () => ({
-    begin: moment().subtract(1, 'month'),   // todo
-    end: moment()
-  })
-]
-
 class mdDateTimePicker {
   /**
   * [constructor of the mdDateTimePicker]
@@ -77,13 +49,14 @@ class mdDateTimePicker {
     colon = true,
     autoClose = false,
     alignTo = null,
-    range = false,
     begin = new Date(),
     end = new Date(),
     inner24 = false,
     prevHandle = '<div class="mddtp-prev-handle"></div>',
     nextHandle = '<div class="mddtp-next-handle"></div>',
-    container = document.body
+    container = document.body,
+    ranges = null,
+    injectElement = null
   }) {
     this._type = type
     this._init = init
@@ -102,9 +75,10 @@ class mdDateTimePicker {
     this._nextHandle = nextHandle
     this._container = container
     this._alignTo = alignTo
-    this._range = range
+    this._ranges = ranges
     this._begin = moment(begin)
     this._end = moment(end)
+    this._injectElement = injectElement  // inject element to range panel and style it externally
 
     /**
     * [dialog selected classes have the same structure as dialog but one level down]
@@ -257,7 +231,7 @@ class mdDateTimePicker {
     this._sDialog.tDate = this._init.clone()
     this._sDialog.sDate = this._init.clone()
 
-    if (this._range) {
+    if (this._ranges) {
       this._sDialog.bDate = this._begin.clone()
       this._sDialog.eDate = this._end.clone()
     }
@@ -391,7 +365,7 @@ class mdDateTimePicker {
     // add body to container
     container.appendChild(body)
     // add stuff to header and body according to dialog type
-    if (this._type === 'date') {
+    if (type === 'date') {
       const outer = document.createElement('div')
       const inner = document.createElement('div')
       const subtitle = document.createElement('div')
@@ -735,7 +709,7 @@ class mdDateTimePicker {
     const titleDay = this._sDialog.titleDay
     const titleMonth = this._sDialog.titleMonth
 
-    if (this._range) {
+    if (this._ranges) {
       this._fillText(subtitle, m.format('YYYY'))
       this._fillText(titleDay, '')
       this._fillText(titleMonth, `${this._begin.format('MMM D, YYYY')} - ${this._end.format('MMM D, YYYY')}`)
@@ -780,11 +754,12 @@ class mdDateTimePicker {
     const ranger = this._sDialog.ranger
     const frag = new DocumentFragment()
 
-    for (let i = 0; i < ranges.length; i++) {
-      const date = beginAndEnd[i]()
+    for (let i = 0; i < this._ranges.length; i++) {
+      const range = this._ranges[i]
+      const date = range.interval()
       const sRangeClass = 'mddtp-picker__range--selected'
       const span = document.createElement('span')
-      span.innerText = ranges[i]
+      span.innerText = range.label
       span.classList.add('mddtp-picker__range')
       span.setAttribute('idx', i)
       frag.appendChild(span)
@@ -794,19 +769,21 @@ class mdDateTimePicker {
       }
     }
 
-    this.__endSelected = true
-
     while (ranger.lastChild) {
       ranger.removeChild(ranger.lastChild)
     }
 
-    ranger.appendChild(frag)
+    if (this._injectElement) {
+      this._injectElement(frag, this, this._trigger || this._container)
+    }
 
+    ranger.appendChild(frag)
+    this.__endSelected = true
     this._addRangeClickEvent(ranger)
   }
 
   _initMonth (view, m) {
-    const displayMonth = m.format('MMMM YYYY')
+    const displayMonth = moment(m).format('MMMM YYYY')
     // get the .mddtp-picker__month element using innerDivs[0]
     const innerDivs = view.getElementsByTagName('div')
     this._fillText(innerDivs[0], displayMonth)
@@ -838,12 +815,12 @@ class mdDateTimePicker {
       future = parseInt(this._future.format('D'), 10)
       future += firstDayOfMonth - 1
     }
-    if (!this._range && this._sDialog.sDate.isSame(m, 'month')) {
+    if (!this._ranges && this._sDialog.sDate.isSame(m, 'month')) {
       selected = parseInt(moment(m).format('D'), 10)
       selected += firstDayOfMonth - 1
     }
 
-    if (this._range) {
+    if (this._ranges) {
       if (this._sDialog.bDate.isBefore(m, 'month') && this._sDialog.eDate.isSameOrAfter(m, 'month')) {
         begin = 0
       } else if (this._sDialog.bDate.isSame(m, 'month')) {
@@ -877,7 +854,7 @@ class mdDateTimePicker {
             cell.classList.add(`${cellClass}--ranged`)
           }
 
-          if (this._range) {
+          if (this._ranges) {
             this._addCellMouseEnterEvent(cell)
             this._addCellMouseLeaveEvent(cell)
           }
@@ -1166,17 +1143,16 @@ class mdDateTimePicker {
         const sRangeClass = 'mddtp-picker__range--selected'
 
         const idx = parseInt(e.target.getAttribute('idx'))
-        const date = beginAndEnd[idx]()
+        const date = me._ranges[idx].interval()
 
-        me._sDialog.tDate = date.begin
+        me._sDialog.tDate = moment.max(date.end, date.begin)
         me._sDialog.bDate = date.begin
         me._sDialog.eDate = date.end
 
         me._initViewHolder()
-        me._fillText(subtitle, `${me._sDialog.tDate.format('YYYY')}`)
+        me._fillText(subtitle, me._sDialog.tDate.year())
         me._fillText(titleDay, '')
         me._fillText(titleMonth, `${me._sDialog.bDate.format('MMM D, YYYY')} - ${me._sDialog.eDate.format('MMM D, YYYY')}`)
-
         me.__endSelected = true
 
         const els = me._sDialog.ranger.children
@@ -1246,7 +1222,7 @@ class mdDateTimePicker {
     el.onclick = function (e) {
       if (e.target && e.target.nodeName === 'SPAN' && e.target.classList.contains('mddtp-picker__cell')) {
 
-        if (me._range) {
+        if (me._ranges) {
           const start = me._sDialog.bDate
           const day = e.target.textContent
           const clickedDate = me._sDialog.tDate.date(day)
@@ -1298,8 +1274,9 @@ class mdDateTimePicker {
             const els = me._sDialog.ranger.children
 
             for (let i = 0; i < els.length; i++) {
+              const range = me._ranges[i]
               const el = els[i]
-              const date = beginAndEnd[i]()
+              const date = range.interval()
 
               if (me._sDialog.bDate.isSame(date.begin, 'day') && me._sDialog.eDate.isSame(date.end, 'day')) {
                 el.classList.add(sRangeClass)
@@ -1442,6 +1419,10 @@ class mdDateTimePicker {
           me._sDialog.tDate = me._getMonth(me._sDialog.tDate, 1)
         }
         me._initViewHolder()
+
+        // REVIEW initViewHolder above removes disabled attribute very early
+        left.setAttribute('disabled', '')
+        right.setAttribute('disabled', '')
       }, 350)
       setTimeout(() => {
         if (!(left.classList.contains('mddtp-button--disabled'))) {
@@ -1450,7 +1431,7 @@ class mdDateTimePicker {
         if (!(right.classList.contains('mddtp-button--disabled'))) {
           right.removeAttribute('disabled')
         }
-      }, 400)
+      }, 500)
     }
   }
 

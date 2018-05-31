@@ -51,39 +51,6 @@
     };
   }();
 
-  var ranges = ['Today', 'Yesterday', 'Last two weeks', 'Current month', 'Previous month', 'All time'],
-      beginAndEnd = [function () {
-    return {
-      begin: (0, _moment2.default)().startOf('day'),
-      end: (0, _moment2.default)()
-    };
-  }, function () {
-    return {
-      begin: (0, _moment2.default)().subtract(1, 'day').startOf('day'),
-      end: (0, _moment2.default)().subtract(1, 'day').endOf('day')
-    };
-  }, function () {
-    return {
-      begin: (0, _moment2.default)().subtract(1, 'week').startOf('week'),
-      end: (0, _moment2.default)()
-    };
-  }, function () {
-    return {
-      begin: (0, _moment2.default)().startOf('month'),
-      end: (0, _moment2.default)()
-    };
-  }, function () {
-    return {
-      begin: (0, _moment2.default)().subtract(1, 'month').startOf('month'),
-      end: (0, _moment2.default)().subtract(1, 'month').endOf('month')
-    };
-  }, function () {
-    return {
-      begin: (0, _moment2.default)().subtract(1, 'month'), // todo
-      end: (0, _moment2.default)()
-    };
-  }];
-
   var mdDateTimePicker = function () {
     /**
     * [constructor of the mdDateTimePicker]
@@ -133,8 +100,6 @@
           autoClose = _ref$autoClose === undefined ? !1 : _ref$autoClose,
           _ref$alignTo = _ref.alignTo,
           alignTo = _ref$alignTo === undefined ? null : _ref$alignTo,
-          _ref$range = _ref.range,
-          range = _ref$range === undefined ? !1 : _ref$range,
           _ref$begin = _ref.begin,
           begin = _ref$begin === undefined ? new Date() : _ref$begin,
           _ref$end = _ref.end,
@@ -146,7 +111,11 @@
           _ref$nextHandle = _ref.nextHandle,
           nextHandle = _ref$nextHandle === undefined ? '<div class="mddtp-next-handle"></div>' : _ref$nextHandle,
           _ref$container = _ref.container,
-          container = _ref$container === undefined ? document.body : _ref$container;
+          container = _ref$container === undefined ? document.body : _ref$container,
+          _ref$ranges = _ref.ranges,
+          ranges = _ref$ranges === undefined ? null : _ref$ranges,
+          _ref$injectElement = _ref.injectElement,
+          injectElement = _ref$injectElement === undefined ? null : _ref$injectElement;
 
       _classCallCheck(this, mdDateTimePicker);
 
@@ -167,9 +136,10 @@
       this._nextHandle = nextHandle;
       this._container = container;
       this._alignTo = alignTo;
-      this._range = range;
+      this._ranges = ranges;
       this._begin = (0, _moment2.default)(begin);
       this._end = (0, _moment2.default)(end);
+      this._injectElement = injectElement; // inject element to range panel and style it externally
 
       /**
       * [dialog selected classes have the same structure as dialog but one level down]
@@ -258,7 +228,7 @@
         this._sDialog.tDate = this._init.clone();
         this._sDialog.sDate = this._init.clone();
 
-        if (this._range) {
+        if (this._ranges) {
           this._sDialog.bDate = this._begin.clone();
           this._sDialog.eDate = this._end.clone();
         }
@@ -384,7 +354,7 @@
         // add body to container
         container.appendChild(body);
         // add stuff to header and body according to dialog type
-        if (this._type === 'date') {
+        if (type === 'date') {
           var outer = document.createElement('div'),
               inner = document.createElement('div'),
               subtitle = document.createElement('div'),
@@ -733,7 +703,7 @@
             titleMonth = this._sDialog.titleMonth;
 
 
-        if (this._range) {
+        if (this._ranges) {
           this._fillText(subtitle, m.format('YYYY'));
           this._fillText(titleDay, '');
           this._fillText(titleMonth, this._begin.format('MMM D, YYYY') + ' - ' + this._end.format('MMM D, YYYY'));
@@ -782,12 +752,13 @@
             frag = new DocumentFragment();
 
 
-        for (var i = 0; i < ranges.length; i++) {
-          var date = beginAndEnd[i](),
+        for (var i = 0; i < this._ranges.length; i++) {
+          var range = this._ranges[i],
+              date = range.interval(),
               sRangeClass = 'mddtp-picker__range--selected',
               span = document.createElement('span');
 
-          span.innerText = ranges[i];
+          span.innerText = range.label;
           span.classList.add('mddtp-picker__range');
           span.setAttribute('idx', i);
           frag.appendChild(span);
@@ -797,20 +768,22 @@
           }
         }
 
-        this.__endSelected = !0;
-
         while (ranger.lastChild) {
           ranger.removeChild(ranger.lastChild);
         }
 
-        ranger.appendChild(frag);
+        if (this._injectElement) {
+          this._injectElement(frag, this, this._trigger || this._container);
+        }
 
+        ranger.appendChild(frag);
+        this.__endSelected = !0;
         this._addRangeClickEvent(ranger);
       }
     }, {
       key: '_initMonth',
       value: function _initMonth(view, m) {
-        var displayMonth = m.format('MMMM YYYY'),
+        var displayMonth = (0, _moment2.default)(m).format('MMMM YYYY'),
             innerDivs = view.getElementsByTagName('div');
         // get the .mddtp-picker__month element using innerDivs[0]
 
@@ -845,12 +818,12 @@
           future = parseInt(this._future.format('D'), 10);
           future += firstDayOfMonth - 1;
         }
-        if (!this._range && this._sDialog.sDate.isSame(m, 'month')) {
+        if (!this._ranges && this._sDialog.sDate.isSame(m, 'month')) {
           selected = parseInt((0, _moment2.default)(m).format('D'), 10);
           selected += firstDayOfMonth - 1;
         }
 
-        if (this._range) {
+        if (this._ranges) {
           if (this._sDialog.bDate.isBefore(m, 'month') && this._sDialog.eDate.isSameOrAfter(m, 'month')) {
             begin = 0;
           } else if (this._sDialog.bDate.isSame(m, 'month')) {
@@ -885,7 +858,7 @@
                 cell.classList.add(cellClass + '--ranged');
               }
 
-              if (this._range) {
+              if (this._ranges) {
                 this._addCellMouseEnterEvent(cell);
                 this._addCellMouseLeaveEvent(cell);
               }
@@ -1153,18 +1126,17 @@
                 titleDay = me._sDialog.titleDay,
                 sRangeClass = 'mddtp-picker__range--selected',
                 idx = parseInt(e.target.getAttribute('idx')),
-                date = beginAndEnd[idx]();
+                date = me._ranges[idx].interval();
 
 
-            me._sDialog.tDate = date.begin;
+            me._sDialog.tDate = _moment2.default.max(date.end, date.begin);
             me._sDialog.bDate = date.begin;
             me._sDialog.eDate = date.end;
 
             me._initViewHolder();
-            me._fillText(subtitle, '' + me._sDialog.tDate.format('YYYY'));
+            me._fillText(subtitle, me._sDialog.tDate.year());
             me._fillText(titleDay, '');
             me._fillText(titleMonth, me._sDialog.bDate.format('MMM D, YYYY') + ' - ' + me._sDialog.eDate.format('MMM D, YYYY'));
-
             me.__endSelected = !0;
 
             var els = me._sDialog.ranger.children;
@@ -1241,7 +1213,7 @@
         el.onclick = function (e) {
           if (e.target && e.target.nodeName === 'SPAN' && e.target.classList.contains('mddtp-picker__cell')) {
 
-            if (me._range) {
+            if (me._ranges) {
               var start = me._sDialog.bDate,
                   day = e.target.textContent,
                   clickedDate = me._sDialog.tDate.date(day),
@@ -1293,8 +1265,9 @@
                 var els = me._sDialog.ranger.children;
 
                 for (var i = 0; i < els.length; i++) {
-                  var _el2 = els[i],
-                      date = beginAndEnd[i]();
+                  var range = me._ranges[i],
+                      _el2 = els[i],
+                      date = range.interval();
 
 
                   if (me._sDialog.bDate.isSame(date.begin, 'day') && me._sDialog.eDate.isSame(date.end, 'day')) {
@@ -1445,6 +1418,10 @@
               me._sDialog.tDate = me._getMonth(me._sDialog.tDate, 1);
             }
             me._initViewHolder();
+
+            // REVIEW initViewHolder above removes disabled attribute very early
+            left.setAttribute('disabled', '');
+            right.setAttribute('disabled', '');
           }, 350);
           setTimeout(function () {
             if (!left.classList.contains('mddtp-button--disabled')) {
@@ -1453,7 +1430,7 @@
             if (!right.classList.contains('mddtp-button--disabled')) {
               right.removeAttribute('disabled');
             }
-          }, 400);
+          }, 500);
         }
       }
     }, {
