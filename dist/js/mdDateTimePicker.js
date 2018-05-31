@@ -778,6 +778,8 @@
 
         ranger.appendChild(frag);
         this.__endSelected = !0;
+        this._trigger.dispatchEvent(new CustomEvent('range-selected', { detail: { begin: this._sDialog.bDate, end: this._sDialog.eDate } }));
+
         this._addRangeClickEvent(ranger);
       }
     }, {
@@ -1143,6 +1145,7 @@
             me._fillText(titleDay, '');
             me._fillText(titleMonth, me._sDialog.bDate.format('MMM D, YYYY') + ' - ' + me._sDialog.eDate.format('MMM D, YYYY'));
             me.__endSelected = !0;
+            me._trigger.dispatchEvent(new CustomEvent('range-selected', { detail: { begin: me._sDialog.bDate, end: me._sDialog.eDate } }));
 
             var els = me._sDialog.ranger.children;
 
@@ -1271,6 +1274,7 @@
                 e.target.id = endId;
 
                 me.__endSelected = !0;
+                me._trigger.dispatchEvent(new CustomEvent('range-selected', { detail: { begin: me._sDialog.bDate, end: me._sDialog.eDate } }));
 
                 var els = me._sDialog.ranger.children;
 

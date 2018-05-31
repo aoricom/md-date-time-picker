@@ -779,6 +779,8 @@ class mdDateTimePicker {
 
     ranger.appendChild(frag)
     this.__endSelected = true
+    this._trigger.dispatchEvent(new CustomEvent('range-selected', {detail: {begin: this._sDialog.bDate, end: this._sDialog.eDate}}))
+
     this._addRangeClickEvent(ranger)
   }
 
@@ -1159,6 +1161,7 @@ class mdDateTimePicker {
         me._fillText(titleDay, '')
         me._fillText(titleMonth, `${me._sDialog.bDate.format('MMM D, YYYY')} - ${me._sDialog.eDate.format('MMM D, YYYY')}`)
         me.__endSelected = true
+        me._trigger.dispatchEvent(new CustomEvent('range-selected', {detail: {begin: me._sDialog.bDate, end: me._sDialog.eDate}}))
 
         const els = me._sDialog.ranger.children
 
@@ -1280,6 +1283,7 @@ class mdDateTimePicker {
             e.target.id = endId
 
             me.__endSelected = true
+            me._trigger.dispatchEvent(new CustomEvent('range-selected', {detail: {begin: me._sDialog.bDate, end: me._sDialog.eDate}}))
 
             const els = me._sDialog.ranger.children
 
