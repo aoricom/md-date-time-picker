@@ -1143,6 +1143,11 @@ class mdDateTimePicker {
         const sRangeClass = 'mddtp-picker__range--selected'
 
         const idx = parseInt(e.target.getAttribute('idx'))
+
+        if (idx !== idx) {
+          return
+        }
+
         const date = me._ranges[idx].interval()
 
         me._sDialog.tDate = moment.max(date.end, date.begin)
@@ -1159,6 +1164,11 @@ class mdDateTimePicker {
 
         for (let i = 0; i < els.length; i++) {
           const el = els[i]
+
+          if (!el.classList.contains('mddtp-picker__range')) {
+            continue
+          }
+
           if (el === e.target) {
             el.classList.add(sRangeClass)
           } else {
@@ -1274,8 +1284,14 @@ class mdDateTimePicker {
             const els = me._sDialog.ranger.children
 
             for (let i = 0; i < els.length; i++) {
-              const range = me._ranges[i]
               const el = els[i]
+              const idx = parseInt(el.getAttribute('idx'))
+
+              if (idx !== idx) {
+                continue
+              }
+
+              const range = me._ranges[idx]
               const date = range.interval()
 
               if (me._sDialog.bDate.isSame(date.begin, 'day') && me._sDialog.eDate.isSame(date.end, 'day')) {

@@ -1125,9 +1125,14 @@
                 titleMonth = me._sDialog.titleMonth,
                 titleDay = me._sDialog.titleDay,
                 sRangeClass = 'mddtp-picker__range--selected',
-                idx = parseInt(e.target.getAttribute('idx')),
-                date = me._ranges[idx].interval();
+                idx = parseInt(e.target.getAttribute('idx'));
 
+
+            if (idx !== idx) {
+              return;
+            }
+
+            var date = me._ranges[idx].interval();
 
             me._sDialog.tDate = _moment2.default.max(date.end, date.begin);
             me._sDialog.bDate = date.begin;
@@ -1143,6 +1148,11 @@
 
             for (var i = 0; i < els.length; i++) {
               var _el = els[i];
+
+              if (!_el.classList.contains('mddtp-picker__range')) {
+                continue;
+              }
+
               if (_el === e.target) {
                 _el.classList.add(sRangeClass);
               } else {
@@ -1265,8 +1275,15 @@
                 var els = me._sDialog.ranger.children;
 
                 for (var i = 0; i < els.length; i++) {
-                  var range = me._ranges[i],
-                      _el2 = els[i],
+                  var _el2 = els[i],
+                      idx = parseInt(_el2.getAttribute('idx'));
+
+
+                  if (idx !== idx) {
+                    continue;
+                  }
+
+                  var range = me._ranges[idx],
                       date = range.interval();
 
 
