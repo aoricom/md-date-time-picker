@@ -65,7 +65,7 @@
     .mddtp-picker__title {
       color: $color-secondary-text;
       font-family: $regular;
-      font-size: 28px;
+      font-size: 20px;
       font-weight: 700;
     }
     .mddtp-picker__subtitle {
@@ -470,7 +470,7 @@
     animation-duration: .3s;
     animation-timing-function: cubic-bezier(.42, 0, .58, 1);
     animation-fill-mode: both;
-  }
+  } 
 }
 
 // media queries
@@ -480,11 +480,17 @@
     display: block;
     @import "dependencies/media-portrait";
   }
+  .mddtp-picker__body .mddtp-picker__outer .mddtp-picker__ranger {
+    display: none;
+  }
 }
 @media screen and (max-width: 415px) {
   .mddtp-picker {
     display: block;
     @import "dependencies/media-portrait";
+  }
+  .mddtp-picker__body .mddtp-picker__outer .mddtp-picker__ranger {
+    display: none;
   }
 }
 // force device orientation portrait
