@@ -27,6 +27,18 @@
     };
   }
 
+  function _toConsumableArray(arr) {
+    if (Array.isArray(arr)) {
+      for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) {
+        arr2[i] = arr[i];
+      }
+
+      return arr2;
+    } else {
+      return Array.from(arr);
+    }
+  }
+
   function _classCallCheck(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
       throw new TypeError("Cannot call a class as a function");
@@ -218,7 +230,7 @@
         *
         * @type {Array}
         */
-        var sDialogEls = ['viewHolder', 'years', 'header', 'unset', 'ranger', 'inner', 'cancel', 'ok', 'left', 'right', 'previous', 'current', 'next', 'subtitle', 'title', 'titleDay', 'titleMonth', 'AM', 'PM', 'needle', 'hourView', 'minuteView', 'hour', 'minute', 'fakeNeedle', 'circularHolder', 'circle', 'dotSpan'],
+        var sDialogEls = ['viewHolder', 'years', 'header', 'unset', 'ranger', 'injected', 'inner', 'cancel', 'ok', 'left', 'right', 'previous', 'current', 'next', 'subtitle', 'title', 'titleDay', 'titleMonth', 'AM', 'PM', 'needle', 'hourView', 'minuteView', 'hour', 'minute', 'fakeNeedle', 'circularHolder', 'circle', 'dotSpan'],
             i = sDialogEls.length;
 
         while (i--) {
@@ -270,6 +282,7 @@
             subtitle = me._sDialog.subtitle,
             inner = this._sDialog.inner,
             ranger = this._sDialog.ranger,
+            injected = this._sDialog.injected,
             AM = this._sDialog.AM,
             PM = this._sDialog.PM,
             minute = this._sDialog.minute,
@@ -297,6 +310,7 @@
           title.classList.remove(active);
           subtitle.classList.add(active);
           inner.classList.remove(zoomOut);
+          injected && injected.classList.remove(zoomOut);
           ranger && ranger.classList.remove(zoomOut);
         } else {
           AM.classList.remove(active);
@@ -430,11 +444,20 @@
           this._addClass(outer, 'outer');
           outer.appendChild(inner);
 
-          var ranger = document.createElement('div');
-          this._addId(ranger, 'ranger');
-          this._addClass(ranger, 'ranger', ['animated']);
+          if (this._ranges) {
+            var ranger = document.createElement('div');
+            this._addId(ranger, 'ranger');
+            this._addClass(ranger, 'ranger', ['animated']);
+            outer.appendChild(ranger);
+          }
 
-          outer.appendChild(ranger);
+          if (this._injectElement) {
+            var injected = document.createElement('div');
+            this._addId(injected, 'injected');
+            this._addClass(injected, 'injected', ['animated']);
+            outer.appendChild(injected);
+          }
+
           outer.appendChild(years);
           body.appendChild(outer);
         } else {
@@ -715,6 +738,10 @@
           this._fillText(titleMonth, m.format('MMM D'));
         }
 
+        if (this._injectElement) {
+          this._initInjected();
+        }
+
         this._initYear();
         this._initViewHolder();
         this._attachEventHandlers();
@@ -772,15 +799,28 @@
           ranger.removeChild(ranger.lastChild);
         }
 
-        if (this._injectElement) {
-          this._injectElement(frag, this, this._trigger || this._container);
-        }
-
         ranger.appendChild(frag);
         this.__endSelected = !0;
         this._trigger.dispatchEvent(new CustomEvent('range-selected', { detail: { begin: this._sDialog.bDate, end: this._sDialog.eDate } }));
 
         this._addRangeClickEvent(ranger);
+      }
+    }, {
+      key: '_initInjected',
+      value: function _initInjected() {
+        var injected = this._sDialog.injected,
+            frag = new DocumentFragment();
+
+
+        if (this._injectElement) {
+          this._injectElement(frag, this, this._trigger || this._container);
+        }
+
+        while (injected.lastChild) {
+          injected.removeChild(injected.lastChild);
+        }
+
+        injected.appendChild(frag);
       }
     }, {
       key: '_initMonth',
@@ -846,23 +886,34 @@
 
         for (var i = 0; i < 42; i++) {
           // create cell
-          var cell = document.createElement('span'),
+          var p = document.createElement('p'),
+              cell = document.createElement('span'),
               currentDay = i - firstDayOfMonth + 1;
 
 
           if (i >= firstDayOfMonth && i <= lastDayOfMonth) {
             if (i > future || i < past) {
-              cell.classList.add(cellClass + '--disabled');
+              p.classList.add(cellClass + '--disabled');
             } else {
-              cell.classList.add(cellClass);
-
-              if (i >= begin && i <= end) {
-                cell.classList.add(cellClass + '--ranged');
+              if (i > begin && i < end) {
+                p.classList.add(cellClass + '--ranged');
               }
 
+              if (i === begin) {
+                p.classList.add(cellClass + '--begin');
+                p.classList.add(cellClass + '--selected');
+              }
+
+              if (i === end) {
+                p.classList.add(cellClass + '--end');
+                p.classList.add(cellClass + '--selected');
+              }
+
+              p.classList.add(cellClass);
+
               if (this._ranges) {
-                this._addCellMouseEnterEvent(cell);
-                this._addCellMouseLeaveEvent(cell);
+                this._addCellMouseEnterEvent(p);
+                this._addCellMouseLeaveEvent(p);
               }
             }
 
@@ -870,16 +921,18 @@
           }
 
           if (today === i) {
-            cell.classList.add(cellClass + '--today');
+            p.classList.add(cellClass + '--today');
           }
 
           if (selected === i) {
-            cell.classList.add(cellClass + '--selected');
+            p.classList.add(cellClass + '--selected');
             cell.id = 'mddtp-date__selected';
           }
 
-          docfrag.appendChild(cell);
+          p.appendChild(cell);
+          docfrag.appendChild(p);
         }
+
         // empty the tr
         while (tr.lastChild) {
           tr.removeChild(tr.lastChild);
@@ -1015,6 +1068,7 @@
         el.setAttribute('disabled', '');
         var inner = me._sDialog.inner,
             ranger = me._sDialog.ranger,
+            injected = me._sDialog.injected,
             years = me._sDialog.years,
             title = me._sDialog.title,
             subtitle = me._sDialog.subtitle,
@@ -1023,6 +1077,7 @@
         if (mdDateTimePicker.dialog.view) {
           inner.classList.add('zoomOut');
           ranger && ranger.classList.add('zoomOut');
+          injected && injected.classList.add('zoomOut');
           years.classList.remove('mddtp-picker__years--invisible');
           years.classList.add('zoomIn');
           // scroll into the view
@@ -1031,6 +1086,11 @@
           years.classList.add('zoomOut');
           inner.classList.remove('zoomOut');
           inner.classList.add('zoomIn');
+
+          if (injected) {
+            injected.classList.remove('zoomOut');
+            injected.classList.add('zoomIn');
+          }
 
           if (ranger) {
             ranger.classList.remove('zoomOut');
@@ -1041,6 +1101,7 @@
             years.classList.remove('zoomIn', 'zoomOut');
             years.classList.add('mddtp-picker__years--invisible');
             inner.classList.remove('zoomIn');
+            injected && injected.classList.remove('zoomIn');
             ranger && ranger.classList.remove('zoomIn');
           }, 300);
         }
@@ -1172,18 +1233,30 @@
 
         el.onmouseenter = function (e) {
           var target = e.target,
-              day = target.textContent,
+              span = target.querySelector('span'),
+              day = span.textContent,
               hoveredDate = me._sDialog.tDate.clone().date(day);
 
 
           if (!me.__endSelected && hoveredDate.isAfter(me._sDialog.bDate, 'day')) {
             var rangedClass = 'mddtp-picker__cell--ranged',
-                current = target;
+                tr = target.parentNode.parentNode,
+                cells = [].concat(_toConsumableArray(tr.querySelectorAll('p'))),
+                idx = cells.indexOf(target);
 
 
-            while (current && !current.classList.contains(rangedClass) && current.classList.contains('mddtp-picker__cell')) {
-              current.classList.add(rangedClass);
-              current = current.previousElementSibling;
+            for (var i = idx; i >= 0; i--) {
+              var cell = cells[i];
+
+              if (!cell.classList.contains('mddtp-picker__cell')) {
+                continue;
+              }
+
+              if (!cell || cell.classList.contains(rangedClass) || cell.classList.contains('mddtp-picker__cell--begin')) {
+                break;
+              }
+
+              cell.classList.add(rangedClass);
             }
           }
         };
@@ -1195,25 +1268,42 @@
 
         el.onmouseleave = function (e) {
           var target = e.target,
-              day = target.textContent,
+              span = target.querySelector('span'),
+              day = span.textContent,
               hoveredDate = me._sDialog.tDate.clone().date(day),
               bDate = me._sDialog.bDate;
 
 
           if (!me.__endSelected && hoveredDate.isAfter(bDate, 'day')) {
             var rangedClass = 'mddtp-picker__cell--ranged',
-                current = target;
+                tr = target.parentNode.parentNode,
+                cells = [].concat(_toConsumableArray(tr.querySelectorAll('p'))),
+                idx = cells.indexOf(target);
 
 
             if (bDate.isSame(hoveredDate, 'month')) {
-              while (current && current.classList.contains(rangedClass) && current.classList.contains('mddtp-picker__cell') && current.previousElementSibling && current.previousElementSibling.classList.contains(rangedClass)) {
-                current.classList.remove(rangedClass);
-                current = current.previousElementSibling;
+              for (var i = idx; i >= 0; i--) {
+                var cell = cells[i];
+
+                if (!cell.classList.contains('mddtp-picker__cell')) {
+                  continue;
+                }
+
+                if (cell.classList.contains('mddtp-picker__cell--begin')) {
+                  break;
+                }
+
+                cell.classList.remove(rangedClass);
               }
             } else {
-              while (current && current.classList.contains(rangedClass) && current.classList.contains('mddtp-picker__cell')) {
-                current.classList.remove(rangedClass);
-                current = current.previousElementSibling;
+              for (var _i2 = idx; _i2 >= 0; _i2--) {
+                var _cell = cells[_i2];
+
+                if (!_cell.classList.contains('mddtp-picker__cell')) {
+                  continue;
+                }
+
+                _cell.classList.remove(rangedClass);
               }
             }
           }
@@ -1224,7 +1314,7 @@
       value: function _addCellClickEvent(el) {
         var me = this;
         el.onclick = function (e) {
-          if (e.target && e.target.nodeName === 'SPAN' && e.target.classList.contains('mddtp-picker__cell')) {
+          if (e.target && e.target.nodeName === 'SPAN') {
 
             if (me._ranges) {
               var start = me._sDialog.bDate,
@@ -1314,11 +1404,12 @@
                   _titleDay = me._sDialog.titleDay,
                   _titleMonth = me._sDialog.titleMonth;
 
+
               if (_selected) {
-                _selected.classList.remove(_sClass);
+                _selected.parentNode.classList.remove(_sClass);
                 _selected.id = '';
               }
-              e.target.classList.add(_sClass);
+              e.target.parentNode.classList.add(_sClass);
               e.target.id = _sId;
 
               // update temp date object with the date selected

@@ -25,7 +25,7 @@
   -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 
 #mddtp-date__unset {
-  margin-right: 64px; }
+  margin-right: 110px; }
 
 .mddtp-button:hover,
 .mddtp-button:focus {
@@ -42,6 +42,7 @@
   box-shadow: 0px 5px 5px -3px rgba(0, 0, 0, 0.2), 0px 8px 10px 1px rgba(0, 0, 0, 0.14), 0px 3px 14px 2px rgba(0, 0, 0, 0.12);
   font-family: "Roboto", "Helvetica", "Arial", sans-serif !important;
   min-width: 280px;
+  max-width: 363px;
   position: fixed;
   top: 50%;
   left: 50%;
@@ -79,7 +80,6 @@
     position: relative;
     background-color: #fff; }
     .mddtp-picker .mddtp-picker__body .mddtp-picker__action {
-      margin-top: 24px;
       padding: 8px 0;
       text-align: right; }
   .mddtp-picker .mddtp-picker__header,
@@ -89,10 +89,10 @@
     height: 100%; }
 
 .mddtp-picker-date .mddtp-picker__left {
-  left: 4px; }
+  left: 10px; }
 
 .mddtp-picker-date .mddtp-picker__right {
-  left: 256px; }
+  right: 10px; }
 
 .mddtp-picker-date .mddtp-picker__left,
 .mddtp-picker-date .mddtp-picker__right {
@@ -121,33 +121,38 @@
     background-repeat: no-repeat;
     background-position: center; }
 
-.mddtp-picker__body .mddtp-picker__outer {
+.mddtp-picker__body .mddtp-picker__outer .mddtp-picker__injected {
+  padding: 8px 24px; }
+
+.mddtp-picker__body .mddtp-picker__outer .mddtp-picker__ranger {
   display: -webkit-flex;
   display: -ms-flexbox;
-  display: flex; }
-  .mddtp-picker__body .mddtp-picker__outer .mddtp-picker__ranger {
-    display: -webkit-flex;
-    display: -ms-flexbox;
-    display: flex;
-    -webkit-flex-direction: column;
-        -ms-flex-direction: column;
-            flex-direction: column;
-    padding-top: 56px; }
-    .mddtp-picker__body .mddtp-picker__outer .mddtp-picker__ranger .mddtp-picker__range {
-      font-size: 14px;
-      padding: 8px 16px 8px 8px;
-      cursor: pointer; }
-    .mddtp-picker__body .mddtp-picker__outer .mddtp-picker__ranger .mddtp-picker__range:hover {
-      background-color: #3976d2;
-      color: #fff; }
-    .mddtp-picker__body .mddtp-picker__outer .mddtp-picker__ranger .mddtp-picker__range:first-child {
-      margin-top: 8px; }
-    .mddtp-picker__body .mddtp-picker__outer .mddtp-picker__ranger .mddtp-picker__range--selected {
-      background-color: #3976d2;
-      color: #fff; }
+  display: flex;
+  -webkit-flex-wrap: wrap;
+      -ms-flex-wrap: wrap;
+          flex-wrap: wrap;
+  margin: 0 24px 0px 24px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(0, 0, 0, 0.12);
+  box-sizing: border-box;
+  font-size: 13px;
+  color: rgba(0, 0, 0, 0.87);
+  text-align: left;
+  line-height: 14px; }
+  .mddtp-picker__body .mddtp-picker__outer .mddtp-picker__ranger .mddtp-picker__range {
+    padding: 8px 16px;
+    cursor: pointer;
+    display: inline;
+    background: rgba(0, 0, 0, 0.06);
+    border-radius: 16px;
+    margin: 0 8px 8px 0; }
+  .mddtp-picker__body .mddtp-picker__outer .mddtp-picker__ranger .mddtp-picker__range:hover,
+  .mddtp-picker__body .mddtp-picker__outer .mddtp-picker__ranger .mddtp-picker__range--selected {
+    background-color: rgba(25, 118, 210, 0.24);
+    color: #1976D2; }
 
 .mddtp-picker__body .mddtp-picker__viewHolder {
-  width: 314px;
+  width: 363px;
   overflow: hidden; }
   .mddtp-picker__body .mddtp-picker__viewHolder .mddtp-picker__views {
     list-style: none;
@@ -157,7 +162,7 @@
     width: 2000px; }
   .mddtp-picker__body .mddtp-picker__viewHolder .mddtp-picker__view {
     display: inline-block;
-    width: 314px;
+    width: 363px;
     text-align: center;
     -webkit-transform: translate3d(-100%, 0, 0);
             transform: translate3d(-100%, 0, 0);
@@ -177,37 +182,66 @@
   .mddtp-picker__body .mddtp-picker__viewHolder .mddtp-picker__view--pause {
     transition: none; }
   .mddtp-picker__body .mddtp-picker__viewHolder .mddtp-picker__grid {
-    padding: 8px 14px 0; }
-    .mddtp-picker__body .mddtp-picker__viewHolder .mddtp-picker__grid span {
+    padding: 8px 0; }
+    .mddtp-picker__body .mddtp-picker__viewHolder .mddtp-picker__grid p {
       display: inline-block;
+      background-color: white;
+      height: 16px;
+      width: 48px;
+      position: relative;
+      top: -13px;
       font-size: 13px;
-      margin: 2px;
-      color: rgba(0, 0, 0, 0.87);
-      border-radius: 50%;
-      width: 36px;
-      height: 36px;
-      line-height: 36px;
-      vertical-align: middle; }
-      .mddtp-picker__body .mddtp-picker__viewHolder .mddtp-picker__grid span.mddtp-picker__cell--today {
+      margin: 24px auto 0 auto; }
+      .mddtp-picker__body .mddtp-picker__viewHolder .mddtp-picker__grid p:nth-child(7n+1) {
+        border-bottom-left-radius: 9px;
+        border-top-left-radius: 9px; }
+      .mddtp-picker__body .mddtp-picker__viewHolder .mddtp-picker__grid p:nth-child(7n+7) {
+        border-bottom-right-radius: 9px;
+        border-top-right-radius: 9px; }
+      .mddtp-picker__body .mddtp-picker__viewHolder .mddtp-picker__grid p.mddtp-picker__cell--ranged {
+        background: rgba(25, 118, 210, 0.5);
+        box-shadow: none; }
+      .mddtp-picker__body .mddtp-picker__viewHolder .mddtp-picker__grid p span {
+        display: inline-block;
+        margin: 2px;
+        color: rgba(0, 0, 0, 0.87);
+        border-radius: 50%;
+        border: 1px solid transparent;
+        width: 34px;
+        height: 34px;
+        line-height: 36px;
+        vertical-align: middle;
+        position: relative;
+        top: -13px; }
+      .mddtp-picker__body .mddtp-picker__viewHolder .mddtp-picker__grid p.mddtp-picker__cell--selected span {
+        background-color: white;
+        color: #1976D2;
+        border: 1px solid #1976D2; }
+      .mddtp-picker__body .mddtp-picker__viewHolder .mddtp-picker__grid p.mddtp-picker__cell--begin {
+        background: linear-gradient(90deg, transparent 50%, rgba(25, 118, 210, 0.5) 50%); }
+      .mddtp-picker__body .mddtp-picker__viewHolder .mddtp-picker__grid p.mddtp-picker__cell--end {
+        background: linear-gradient(90deg, rgba(25, 118, 210, 0.5) 50%, transparent 50%); }
+      .mddtp-picker__body .mddtp-picker__viewHolder .mddtp-picker__grid p.mddtp-picker__cell--begin.mddtp-picker__cell--end {
+        background: transparent; }
+      .mddtp-picker__body .mddtp-picker__viewHolder .mddtp-picker__grid p.mddtp-picker__cell--today span {
         color: #3976d2;
         font-weight: 600; }
-      .mddtp-picker__body .mddtp-picker__viewHolder .mddtp-picker__grid span.mddtp-picker__cell--selected, .mddtp-picker__body .mddtp-picker__viewHolder .mddtp-picker__grid .mddtp-picker__tr span.mddtp-picker__cell:hover {
-        background-color: #3976d2;
-        color: #fff; }
-      .mddtp-picker__body .mddtp-picker__viewHolder .mddtp-picker__grid span.mddtp-picker__cell--disabled {
+      .mddtp-picker__body .mddtp-picker__viewHolder .mddtp-picker__grid p.mddtp-picker__cell--disabled span {
         color: rgba(0, 0, 0, 0.26);
         cursor: not-allowed; }
-      .mddtp-picker__body .mddtp-picker__viewHolder .mddtp-picker__grid span.mddtp-picker__cell--ranged {
-        border: 1px solid #3976d2;
-        width: 34px;
-        height: 34px; }
     .mddtp-picker__body .mddtp-picker__viewHolder .mddtp-picker__grid .mddtp-picker__tr {
-      padding: 2px 0; }
-      .mddtp-picker__body .mddtp-picker__viewHolder .mddtp-picker__grid .mddtp-picker__tr .mddtp-picker__cell {
+      padding: 2px 0 0 0; }
+      .mddtp-picker__body .mddtp-picker__viewHolder .mddtp-picker__grid .mddtp-picker__tr .mddtp-picker__cell span {
         pointer-events: all;
         cursor: pointer; }
     .mddtp-picker__body .mddtp-picker__viewHolder .mddtp-picker__grid .mddtp-picker__th span {
-      color: rgba(0, 0, 0, 0.54); }
+      color: rgba(0, 0, 0, 0.54);
+      display: inline-block;
+      width: 48px;
+      height: 48px;
+      line-height: 36px;
+      vertical-align: middle;
+      font-size: 13px; }
 
 .mddtp-picker__years {
   position: absolute;
@@ -283,7 +317,7 @@
       line-height: 36px;
       text-align: center;
       margin-right: 8px; }
-    .mddtp-picker__circularView .mddtp-picker__cell--selected span, .mddtp-picker__circularView .mddtp-picker__body .mddtp-picker__viewHolder .mddtp-picker__grid .mddtp-picker__tr .mddtp-picker__cell:hover span, .mddtp-picker__body .mddtp-picker__viewHolder .mddtp-picker__grid .mddtp-picker__tr .mddtp-picker__circularView .mddtp-picker__cell:hover span {
+    .mddtp-picker__circularView .mddtp-picker__cell--selected span, .mddtp-picker__circularView .mddtp-picker__body .mddtp-picker__viewHolder .mddtp-picker__grid .mddtp-picker__tr .mddtp-picker__cell span:hover span, .mddtp-picker__body .mddtp-picker__viewHolder .mddtp-picker__grid .mddtp-picker__tr .mddtp-picker__cell .mddtp-picker__circularView span:hover span {
       color: #fff; }
   .mddtp-picker__circularView--hidden {
     display: none; }
@@ -1440,21 +1474,24 @@
 .mddtp-picker.zoomIn,
 .mddtp-picker__inner.zoomIn,
 .mddtp-picker__years.zoomIn,
-.mddtp-picker__ranger.zoomIn {
+.mddtp-picker__ranger.zoomIn,
+.mddtp-picker__injected.zoomIn {
   -webkit-animation-name: zoomIn;
           animation-name: zoomIn; }
 
 .mddtp-picker.zoomOut,
 .mddtp-picker__inner.zoomOut,
 .mddtp-picker__years.zoomOut,
-.mddtp-picker__ranger.zoomOut {
+.mddtp-picker__ranger.zoomOut,
+.mddtp-picker__injected.zoomOut {
   -webkit-animation-name: zoomOut;
           animation-name: zoomOut; }
 
 .mddtp-picker.animated,
 .mddtp-picker__inner.animated,
 .mddtp-picker__years.animated,
-.mddtp-picker__ranger.animated {
+.mddtp-picker__ranger.animated,
+.mddtp-picker__injected.animated {
   -webkit-animation-duration: .3s;
           animation-duration: .3s;
   -webkit-animation-timing-function: cubic-bezier(0.42, 0, 0.58, 1);
@@ -1488,9 +1525,7 @@
     .mddtp-picker.mddtp-picker-time .mddtp-picker__body {
       padding-top: 20px; }
     .mddtp-picker.mddtp-picker-time .mddtp-picker__circularHolder {
-      margin-top: 0; }
-  .mddtp-picker__body .mddtp-picker__outer .mddtp-picker__ranger {
-    display: none; } }
+      margin-top: 0; } }
 
 @media screen and (max-width: 415px) {
   .mddtp-picker {
@@ -1518,9 +1553,7 @@
     .mddtp-picker.mddtp-picker-time .mddtp-picker__body {
       padding-top: 20px; }
     .mddtp-picker.mddtp-picker-time .mddtp-picker__circularHolder {
-      margin-top: 0; }
-  .mddtp-picker__body .mddtp-picker__outer .mddtp-picker__ranger {
-    display: none; } }
+      margin-top: 0; } }
 
 .mddtp-picker--portrait {
   display: block; }

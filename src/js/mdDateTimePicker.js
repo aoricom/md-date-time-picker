@@ -221,7 +221,7 @@ class mdDateTimePicker {
     * @type {Array}
     */
     const sDialogEls = [
-      'viewHolder', 'years', 'header', 'unset', 'ranger', 'inner', 'cancel', 'ok', 'left', 'right', 'previous', 'current', 'next', 'subtitle', 'title', 'titleDay', 'titleMonth', 'AM', 'PM', 'needle', 'hourView', 'minuteView', 'hour', 'minute', 'fakeNeedle', 'circularHolder', 'circle', 'dotSpan'
+      'viewHolder', 'years', 'header', 'unset', 'ranger', 'injected', 'inner', 'cancel', 'ok', 'left', 'right', 'previous', 'current', 'next', 'subtitle', 'title', 'titleDay', 'titleMonth', 'AM', 'PM', 'needle', 'hourView', 'minuteView', 'hour', 'minute', 'fakeNeedle', 'circularHolder', 'circle', 'dotSpan'
     ]
     let i = sDialogEls.length
     while (i--) {
@@ -281,6 +281,7 @@ class mdDateTimePicker {
     const subtitle = me._sDialog.subtitle
     const inner = this._sDialog.inner
     const ranger = this._sDialog.ranger
+    const injected = this._sDialog.injected
     const AM = this._sDialog.AM
     const PM = this._sDialog.PM
     const minute = this._sDialog.minute
@@ -307,6 +308,7 @@ class mdDateTimePicker {
       title.classList.remove(active)
       subtitle.classList.add(active)
       inner.classList.remove(zoomOut)
+      injected && injected.classList.remove(zoomOut)
       ranger && ranger.classList.remove(zoomOut)
     } else {
       AM.classList.remove(active)
@@ -440,11 +442,20 @@ class mdDateTimePicker {
       this._addClass(outer, 'outer')
       outer.appendChild(inner)
 
-      const ranger = document.createElement('div')
-      this._addId(ranger, 'ranger')
-      this._addClass(ranger, 'ranger', ['animated'])
+      if (this._ranges) {
+        const ranger = document.createElement('div')
+        this._addId(ranger, 'ranger')
+        this._addClass(ranger, 'ranger', ['animated'])
+        outer.appendChild(ranger)
+      }
 
-      outer.appendChild(ranger)
+      if (this._injectElement) {
+        const injected = document.createElement('div')
+        this._addId(injected, 'injected')
+        this._addClass(injected, 'injected', ['animated'])
+        outer.appendChild(injected)
+      }
+
       outer.appendChild(years)
       body.appendChild(outer)
     } else {
@@ -721,6 +732,10 @@ class mdDateTimePicker {
       this._fillText(titleMonth, m.format('MMM D'))
     }
 
+    if (this._injectElement) {
+      this._initInjected()
+    }
+
     this._initYear()
     this._initViewHolder()
     this._attachEventHandlers()
@@ -773,15 +788,26 @@ class mdDateTimePicker {
       ranger.removeChild(ranger.lastChild)
     }
 
-    if (this._injectElement) {
-      this._injectElement(frag, this, this._trigger || this._container)
-    }
-
     ranger.appendChild(frag)
     this.__endSelected = true
     this._trigger.dispatchEvent(new CustomEvent('range-selected', {detail: {begin: this._sDialog.bDate, end: this._sDialog.eDate}}))
 
     this._addRangeClickEvent(ranger)
+  }
+
+  _initInjected () {
+    const injected = this._sDialog.injected
+    const frag = new DocumentFragment()
+
+    if (this._injectElement) {
+      this._injectElement(frag, this, this._trigger || this._container)
+    }
+
+    while (injected.lastChild) {
+      injected.removeChild(injected.lastChild)
+    }
+
+    injected.appendChild(frag)
   }
 
   _initMonth (view, m) {
@@ -843,22 +869,33 @@ class mdDateTimePicker {
 
     for (let i = 0; i < 42; i++) {
       // create cell
+      const p = document.createElement('p')
       const cell = document.createElement('span')
       const currentDay = i - firstDayOfMonth + 1
 
       if ((i >= firstDayOfMonth) && (i <= lastDayOfMonth)) {
         if (i > future || i < past) {
-          cell.classList.add(`${cellClass}--disabled`)
+          p.classList.add(`${cellClass}--disabled`)
         } else {
-          cell.classList.add(cellClass)
-
-          if (i >= begin && i <= end) {
-            cell.classList.add(`${cellClass}--ranged`)
+          if (i > begin && i < end) {
+            p.classList.add(`${cellClass}--ranged`)
           }
 
+          if (i === begin) {
+            p.classList.add(`${cellClass}--begin`)
+            p.classList.add(`${cellClass}--selected`)
+          }
+
+          if (i === end) {
+            p.classList.add(`${cellClass}--end`)
+            p.classList.add(`${cellClass}--selected`)
+          }
+
+          p.classList.add(cellClass)
+
           if (this._ranges) {
-            this._addCellMouseEnterEvent(cell)
-            this._addCellMouseLeaveEvent(cell)
+            this._addCellMouseEnterEvent(p)
+            this._addCellMouseLeaveEvent(p)
           }
         }
 
@@ -866,16 +903,18 @@ class mdDateTimePicker {
       }
 
       if (today === i) {
-        cell.classList.add(`${cellClass}--today`)
+        p.classList.add(`${cellClass}--today`)
       }
 
       if (selected === i) {
-        cell.classList.add(`${cellClass}--selected`)
+        p.classList.add(`${cellClass}--selected`)
         cell.id = 'mddtp-date__selected'
       }
 
-      docfrag.appendChild(cell)
+      p.appendChild(cell)
+      docfrag.appendChild(p)
     }
+
     // empty the tr
     while (tr.lastChild) {
       tr.removeChild(tr.lastChild)
@@ -1037,6 +1076,7 @@ class mdDateTimePicker {
     el.setAttribute('disabled', '')
     const inner = me._sDialog.inner
     const ranger = me._sDialog.ranger
+    const injected = me._sDialog.injected
     const years = me._sDialog.years
     const title = me._sDialog.title
     const subtitle = me._sDialog.subtitle
@@ -1044,6 +1084,7 @@ class mdDateTimePicker {
     if (mdDateTimePicker.dialog.view) {
       inner.classList.add('zoomOut')
       ranger && ranger.classList.add('zoomOut')
+      injected && injected.classList.add('zoomOut')
       years.classList.remove('mddtp-picker__years--invisible')
       years.classList.add('zoomIn')
       // scroll into the view
@@ -1052,6 +1093,11 @@ class mdDateTimePicker {
       years.classList.add('zoomOut')
       inner.classList.remove('zoomOut')
       inner.classList.add('zoomIn')
+
+      if (injected) {
+        injected.classList.remove('zoomOut')
+        injected.classList.add('zoomIn')
+      }
 
       if (ranger) {
         ranger.classList.remove('zoomOut')
@@ -1062,6 +1108,7 @@ class mdDateTimePicker {
         years.classList.remove('zoomIn', 'zoomOut')
         years.classList.add('mddtp-picker__years--invisible')
         inner.classList.remove('zoomIn')
+        injected && injected.classList.remove('zoomIn')
         ranger && ranger.classList.remove('zoomIn')
       }, 300)
     }
@@ -1187,16 +1234,28 @@ class mdDateTimePicker {
 
     el.onmouseenter = function (e) {
       const target = e.target
-      const day = target.textContent
+      const span = target.querySelector('span')
+      const day = span.textContent
       const hoveredDate = me._sDialog.tDate.clone().date(day)
 
       if (!me.__endSelected && hoveredDate.isAfter(me._sDialog.bDate, 'day')) {
         const rangedClass = 'mddtp-picker__cell--ranged'
-        let current = target
+        const tr = target.parentNode.parentNode
+        const cells = [...tr.querySelectorAll('p')]
+        const idx = cells.indexOf(target)
 
-        while (current && !current.classList.contains(rangedClass) && current.classList.contains('mddtp-picker__cell')) {
-          current.classList.add(rangedClass)
-          current = current.previousElementSibling
+        for (let i = idx; i >= 0; i--) {
+          const cell = cells[i]
+
+          if (!cell.classList.contains('mddtp-picker__cell')) {
+            continue
+          }
+
+          if (!cell || cell.classList.contains(rangedClass) || cell.classList.contains('mddtp-picker__cell--begin')) {
+            break
+          }
+
+          cell.classList.add(rangedClass)
         }
       }
     }
@@ -1207,23 +1266,40 @@ class mdDateTimePicker {
 
     el.onmouseleave = function (e) {
       const target = e.target
-      const day = target.textContent
+      const span = target.querySelector('span')
+      const day = span.textContent
       const hoveredDate = me._sDialog.tDate.clone().date(day)
       const bDate = me._sDialog.bDate
 
       if (!me.__endSelected && hoveredDate.isAfter(bDate, 'day')) {
         const rangedClass = 'mddtp-picker__cell--ranged'
-        let current = target
+        const tr = target.parentNode.parentNode
+        const cells = [...tr.querySelectorAll('p')]
+        const idx = cells.indexOf(target)
 
         if (bDate.isSame(hoveredDate, 'month')) {
-          while (current && current.classList.contains(rangedClass) && current.classList.contains('mddtp-picker__cell') && current.previousElementSibling && current.previousElementSibling.classList.contains(rangedClass)) {
-            current.classList.remove(rangedClass)
-            current = current.previousElementSibling
+          for (let i = idx; i >= 0; i--) {
+            const cell = cells[i]
+
+            if (!cell.classList.contains('mddtp-picker__cell')) {
+              continue
+            }
+
+            if (cell.classList.contains('mddtp-picker__cell--begin')) {
+              break
+            }
+
+            cell.classList.remove(rangedClass)
           }
         } else {
-          while (current && current.classList.contains(rangedClass) && current.classList.contains('mddtp-picker__cell')) {
-            current.classList.remove(rangedClass)
-            current = current.previousElementSibling
+          for (let i = idx; i >= 0; i--) {
+            const cell = cells[i]
+
+            if (!cell.classList.contains('mddtp-picker__cell')) {
+              continue
+            }
+
+            cell.classList.remove(rangedClass)
           }
         }
       }
@@ -1233,7 +1309,7 @@ class mdDateTimePicker {
   _addCellClickEvent (el) {
     const me = this
     el.onclick = function (e) {
-      if (e.target && e.target.nodeName === 'SPAN' && e.target.classList.contains('mddtp-picker__cell')) {
+      if (e.target && e.target.nodeName === 'SPAN') {
 
         if (me._ranges) {
           const start = me._sDialog.bDate
@@ -1320,11 +1396,12 @@ class mdDateTimePicker {
           const subtitle = me._sDialog.subtitle
           const titleDay = me._sDialog.titleDay
           const titleMonth = me._sDialog.titleMonth
+
           if (selected) {
-            selected.classList.remove(sClass)
+            selected.parentNode.classList.remove(sClass)
             selected.id = ''
           }
-          e.target.classList.add(sClass)
+          e.target.parentNode.classList.add(sClass)
           e.target.id = sId
 
           // update temp date object with the date selected

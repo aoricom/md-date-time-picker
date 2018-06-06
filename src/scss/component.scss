@@ -29,7 +29,7 @@
 }
 
 #mddtp-date__unset {
-  margin-right: 64px;
+  margin-right: 110px;
 }
 
 .mddtp-button:hover,
@@ -48,6 +48,7 @@
   @include shadow-8dp();
   font-family: $regular !important;
   min-width: 5 * 56px;
+  max-width: 363px;
   position: fixed;
   top: 50%;
   left: 50%;
@@ -88,7 +89,6 @@
     background-color: $picker-body-color;
 
     .mddtp-picker__action {
-      margin-top: 24px;
       padding: 8px 0;
       text-align: right;
     }
@@ -103,10 +103,10 @@
 //date component dialog
 .mddtp-picker-date {
   .mddtp-picker__left {
-    left: 4px;
+    left: 10px;
   }
   .mddtp-picker__right {
-    left: 256px;
+    right: 10px;
   }
   .mddtp-picker__left,
   .mddtp-picker__right {
@@ -138,32 +138,33 @@
 }
 .mddtp-picker__body {
   .mddtp-picker__outer {
-    display: flex;
-
-    .mddtp-picker__inner {
-
+    .mddtp-picker__injected {
+      padding: 8px 24px;
     }
-
     .mddtp-picker__ranger {
       display: flex;
-      flex-direction: column;
-      padding-top: 56px;
+      flex-wrap: wrap;
+      margin: 0 24px 0px 24px;
+      padding-top: 16px;
+      border-top: 1px solid rgba(0,0,0,0.12);
+      box-sizing: border-box;
+      font-size: 13px;
+      color: rgba(0,0,0,0.87);
+      text-align: left;
+      line-height: 14px;
 
       .mddtp-picker__range {
-        font-size: 14px;
-        padding: 8px 16px 8px 8px;
+        padding: 8px 16px;
         cursor: pointer;
+        display: inline;
+        background: rgba(0,0,0,0.06);
+        border-radius: 16px;
+        margin: 0 8px 8px 0;
       }
-      .mddtp-picker__range:hover {
-        background-color: $md-button-color;
-        color: $picker-body-color;
-      }
-      .mddtp-picker__range:first-child {
-        margin-top: 8px;
-      }
+      .mddtp-picker__range:hover,
       .mddtp-picker__range--selected {
-        background-color: $md-button-color;
-        color: $picker-body-color;
+        background-color: rgba(25,118,210,0.24);
+        color: #1976D2;
       }
     }
   }
@@ -172,7 +173,7 @@
 
 
   .mddtp-picker__viewHolder {
-    width: 314px;
+    width: 363px;
     overflow: hidden;
     .mddtp-picker__views {
       list-style: none;
@@ -183,7 +184,7 @@
     }
     .mddtp-picker__view {
       display: inline-block;
-      width: 314px;
+      width: 363px;
       text-align: center;
       transform: translate3d(-100%,0,0);
       transition: .3s cubic-bezier(.42, 0, .58, 1);
@@ -205,38 +206,80 @@
       transition: none;
     }
     .mddtp-picker__grid {
-      padding: 8px 14px 0;
-      span {
+      padding: 8px 0;
+
+      p {
         display: inline-block;
+        background-color: white;
+        height: 16px;
+        width: 48px;
+        position: relative;
+        top: -13px;
         font-size: 13px;
-        margin: 2px;
-        color: $picker-primary-text-theme-color;
-        border-radius: 50%;
-        width: 36px;
-        height: 36px;
-        line-height: 36px;
-        vertical-align: middle;
-        &.mddtp-picker__cell--today {
+        margin: 24px auto 0 auto;
+        
+        &:nth-child(7n+1) {
+          border-bottom-left-radius: 9px;
+          border-top-left-radius: 9px;
+        }
+
+        &:nth-child(7n+7) {
+          border-bottom-right-radius: 9px;
+          border-top-right-radius: 9px;
+        }
+
+        &.mddtp-picker__cell--ranged {
+          background: rgba(25,118,210,0.50);
+          box-shadow: none;
+        }
+
+        & span {
+          display: inline-block;
+          margin: 2px;
+          color: $picker-primary-text-theme-color;
+          border-radius: 50%;
+          border: 1px solid transparent;
+          width: 34px;
+          height: 34px;
+          line-height: 36px;
+          vertical-align: middle;
+          position: relative;
+          top: -13px;
+        }
+
+        &.mddtp-picker__cell--selected span {
+          background-color: white;
+          color: #1976D2;
+          border: 1px solid #1976D2;
+        }
+
+        &.mddtp-picker__cell--begin {
+          background: linear-gradient(90deg, transparent 50%, rgba(25, 118, 210, 0.5) 50%);
+        }
+
+        &.mddtp-picker__cell--end {
+          background: linear-gradient(90deg, rgba(25, 118, 210, 0.5) 50%, transparent 50%);
+        }
+
+        &.mddtp-picker__cell--begin.mddtp-picker__cell--end {
+          background: transparent;
+        }
+
+        &.mddtp-picker__cell--today span {
           color: $md-button-color;
           font-weight: 600;
         }
-        &.mddtp-picker__cell--selected {
-          background-color: $md-button-color;
-          color: $picker-body-color;
-        }
-        &.mddtp-picker__cell--disabled {
+        
+        &.mddtp-picker__cell--disabled span {
           color: $md-button-color--disabled;
           cursor: not-allowed;
         }
-        &.mddtp-picker__cell--ranged {
-          border: 1px solid $md-button-color;
-          width: 34px;
-          height: 34px;
-        }
+        
       }
+
       .mddtp-picker__tr {
-        padding: 2px 0;
-        .mddtp-picker__cell {
+        padding: 2px 0 0 0;
+        .mddtp-picker__cell span {
           pointer-events: all;
           cursor: pointer;
           &:hover {
@@ -247,6 +290,12 @@
       .mddtp-picker__th {
         span {
           color: $picker-secondary-text-theme-color;
+          display: inline-block;
+          width: 48px;
+          height: 48px;
+          line-height: 36px;
+          vertical-align: middle;
+          font-size: 13px;
         }
       }
     }
@@ -459,7 +508,8 @@
 .mddtp-picker,
 .mddtp-picker__inner,
 .mddtp-picker__years,
-.mddtp-picker__ranger {
+.mddtp-picker__ranger,
+.mddtp-picker__injected {
   &.zoomIn {
     animation-name: zoomIn;
   }
@@ -480,17 +530,11 @@
     display: block;
     @import "dependencies/media-portrait";
   }
-  .mddtp-picker__body .mddtp-picker__outer .mddtp-picker__ranger {
-    display: none;
-  }
 }
 @media screen and (max-width: 415px) {
   .mddtp-picker {
     display: block;
     @import "dependencies/media-portrait";
-  }
-  .mddtp-picker__body .mddtp-picker__outer .mddtp-picker__ranger {
-    display: none;
   }
 }
 // force device orientation portrait
