@@ -189,7 +189,13 @@
       value: function show() {
         this._selectDialog();
         if (this._type === 'date') {
-          this._initDateDialog(this._init);
+          var initial = this._ranges ? this._begin.clone() : this._init.clone();
+
+          if (this._ranges) {
+            this._sDialog.tDate = this._begin.clone();
+          }
+
+          this._initDateDialog(initial);
         } else if (this._type === 'time') {
           this._initTimeDialog(this._init);
         }
@@ -760,12 +766,14 @@
             past = this._past,
             future = this._future;
 
+
         if (m.isBefore(past, 'month')) {
           m = past.clone();
         }
         if (m.isAfter(future, 'month')) {
           m = future.clone();
         }
+
         this._sDialog.tDate = m;
         this._initMonth(current, m);
         this._initMonth(next, (0, _moment2.default)(this._getMonth(m, 1)));
@@ -783,12 +791,19 @@
           var range = this._ranges[i],
               date = range.interval(),
               sRangeClass = 'mddtp-picker__range--selected',
-              span = document.createElement('span');
+              sDisabledClass = 'mddtp-picker__range--disabled',
+              span = document.createElement('span'),
+              past = this._past,
+              future = this._future;
 
           span.innerText = range.label;
           span.classList.add('mddtp-picker__range');
           span.setAttribute('idx', i);
           frag.appendChild(span);
+
+          if (date.begin.isBefore(past, 'day') || date.end.isAfter(future, 'month')) {
+            span.classList.add(sDisabledClass);
+          }
 
           if (this._sDialog.bDate.isSame(date.begin, 'day') && this._sDialog.eDate.isSame(date.end, 'day')) {
             span.classList.add(sRangeClass);
@@ -867,7 +882,7 @@
 
         if (this._ranges) {
           if (this._sDialog.bDate.isBefore(m, 'month') && this._sDialog.eDate.isSameOrAfter(m, 'month')) {
-            begin = 0;
+            begin = -1;
           } else if (this._sDialog.bDate.isSame(m, 'month')) {
             begin = this._sDialog.bDate.date();
             begin += firstDayOfMonth - 1;
@@ -880,7 +895,7 @@
             end += firstDayOfMonth - 1;
           }
 
-          begin = begin !== 101 || end === -1 ? begin : 0;
+          begin = begin !== 101 || end === -1 ? begin : -1;
           end = end !== -1 || begin !== 101 ? end : 42;
         }
 
@@ -1183,7 +1198,7 @@
         var me = this;
 
         el.onclick = function (e) {
-          if (e.target && e.target.nodeName === 'SPAN') {
+          if (e.target && e.target.nodeName === 'SPAN' && !e.target.classList.contains('mddtp-picker__range--disabled')) {
             var subtitle = me._sDialog.subtitle,
                 titleMonth = me._sDialog.titleMonth,
                 titleDay = me._sDialog.titleDay,
