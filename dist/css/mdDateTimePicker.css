@@ -1517,7 +1517,8 @@
       height: 100%;
       width: 100%; }
     .mddtp-picker.mddtp-picker-date .mddtp-picker__title div {
-      display: inline-block; }
+      display: inline-block;
+      margin-right: 4px; }
     .mddtp-picker.mddtp-picker-time .mddtp-picker__header {
       text-align: right;
       width: calc(100% - 48px); }
@@ -1545,7 +1546,8 @@
       height: 100%;
       width: 100%; }
     .mddtp-picker.mddtp-picker-date .mddtp-picker__title div {
-      display: inline-block; }
+      display: inline-block;
+      margin-right: 4px; }
     .mddtp-picker.mddtp-picker-time .mddtp-picker__header {
       text-align: right;
       width: calc(100% - 48px); }
@@ -1572,7 +1574,8 @@
     height: 100%;
     width: 100%; }
   .mddtp-picker--portrait.mddtp-picker-date .mddtp-picker__title div {
-    display: inline-block; }
+    display: inline-block;
+    margin-right: 4px; }
   .mddtp-picker--portrait.mddtp-picker-time .mddtp-picker__header {
     text-align: right;
     width: calc(100% - 48px); }
