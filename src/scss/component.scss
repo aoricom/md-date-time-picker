@@ -542,6 +542,15 @@
     @import "dependencies/media-portrait";
   }
 }
+@media screen and (max-height: 800px) {
+  .mddtp-picker__body .mddtp-picker__outer .mddtp-picker__injected {
+    display: none;
+  }
+  .mddtp-picker__body .mddtp-picker__outer .mddtp-picker__ranger {
+    display: none;
+  }
+}
+
 // force device orientation portrait
 .mddtp-picker--portrait {
   display: block;
