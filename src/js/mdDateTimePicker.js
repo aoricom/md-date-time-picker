@@ -10,7 +10,7 @@
 * import necessary components
 */
 import moment from 'moment'
-import Draggabilly from 'draggabilly'
+// import Draggabilly from 'draggabilly'
 
 class mdDateTimePicker {
   /**
@@ -1618,112 +1618,112 @@ class mdDateTimePicker {
   }
 
   _dragDial () {
-    const me = this
-    const needle = this._sDialog.needle
-    const circle = this._sDialog.circle
-    const fakeNeedle = this._sDialog.fakeNeedle
-    const circularHolder = this._sDialog.circularHolder
-    const minute = this._sDialog.minute
-    const quick = 'mddtp-picker__selection--quick'
-    const selection = 'mddtp-picker__selection'
-    const selected = 'mddtp-picker__cell--selected'
-    const rotate = 'mddtp-picker__cell--rotate-'
-    let hOffset = circularHolder.getBoundingClientRect()
-    let divides
-    const fakeNeedleDraggabilly = new Draggabilly(fakeNeedle, {
-      containment: true
-    })
-    fakeNeedleDraggabilly.on('pointerDown', () => {
-      // console.info ( 'pointerDown' , e );
-      hOffset = circularHolder.getBoundingClientRect()
-    })
-    /**
-     * netTrek
-     * fixes for iOS - drag
-     */
-    fakeNeedleDraggabilly.on('pointerMove', (e) => {
-      let clientX = e.clientX
-      let clientY = e.clientY
+    // const me = this
+    // const needle = this._sDialog.needle
+    // const circle = this._sDialog.circle
+    // const fakeNeedle = this._sDialog.fakeNeedle
+    // const circularHolder = this._sDialog.circularHolder
+    // const minute = this._sDialog.minute
+    // const quick = 'mddtp-picker__selection--quick'
+    // const selection = 'mddtp-picker__selection'
+    // const selected = 'mddtp-picker__cell--selected'
+    // const rotate = 'mddtp-picker__cell--rotate-'
+    // let hOffset = circularHolder.getBoundingClientRect()
+    // let divides
+    // const fakeNeedleDraggabilly = new Draggabilly(fakeNeedle, {
+    //   containment: true
+    // })
+    // fakeNeedleDraggabilly.on('pointerDown', () => {
+    //   // console.info ( 'pointerDown' , e );
+    //   hOffset = circularHolder.getBoundingClientRect()
+    // })
+    // /**
+    //  * netTrek
+    //  * fixes for iOS - drag
+    //  */
+    // fakeNeedleDraggabilly.on('pointerMove', (e) => {
+    //   let clientX = e.clientX
+    //   let clientY = e.clientY
 
-      if (clientX === undefined) {
-        if (e.pageX === undefined) {
-          if (e.touches && e.touches.length > 0) {
-            clientX = e.touches[0].clientX
-            clientY = e.touches[0].clientY
-          } else {
-            throw new Error('coult not detect pageX, pageY')
-          }
-        } else {
-          clientX = e.pageX - document.body.scrollLeft - document.documentElement.scrollLeft
-          clientY = e.pageY - document.body.scrollTop - document.documentElement.scrollTop
-        }
-      }
-      // console.info ( 'Drag clientX' , clientX, clientY, e );
+    //   if (clientX === undefined) {
+    //     if (e.pageX === undefined) {
+    //       if (e.touches && e.touches.length > 0) {
+    //         clientX = e.touches[0].clientX
+    //         clientY = e.touches[0].clientY
+    //       } else {
+    //         throw new Error('coult not detect pageX, pageY')
+    //       }
+    //     } else {
+    //       clientX = e.pageX - document.body.scrollLeft - document.documentElement.scrollLeft
+    //       clientY = e.pageY - document.body.scrollTop - document.documentElement.scrollTop
+    //     }
+    //   }
+    //   // console.info ( 'Drag clientX' , clientX, clientY, e );
 
-      const xPos = clientX - hOffset.left - (hOffset.width / 2)
-      const yPos = clientY - hOffset.top - (hOffset.height / 2)
+    //   const xPos = clientX - hOffset.left - (hOffset.width / 2)
+    //   const yPos = clientY - hOffset.top - (hOffset.height / 2)
 
-      let slope = Math.atan2(-yPos, xPos)
-      needle.className = ''
-      if (slope < 0) {
-        slope += 2 * Math.PI
-      }
-      slope *= 180 / Math.PI
-      slope = 360 - slope
-      if (slope > 270) {
-        slope -= 360
-      }
-      divides = parseInt(slope / 6)
-      const same = Math.abs((6 * divides) - slope)
-      const upper = Math.abs((6 * (divides + 1)) - slope)
-      if (upper < same) {
-        divides++
-      }
-      divides += 15
-      needle.classList.add(selection)
-      needle.classList.add(quick)
-      needle.classList.add(rotate + (divides * 2))
-      minute.textContent = me._numWithZero(divides)
-    })
-    /**
-     * netTrek
-     * fixes for iOS - drag
-     */
-    const onDragEnd = function () {
-      const minuteViewChildren = me._sDialog.minuteView.getElementsByTagName('div')
-      const sMinute = 'mddtp-minute__selected'
-      const selectedMinute = me._container.querySelector('#' + sMinute)
-      const cOffset = circle.getBoundingClientRect()
-      fakeNeedle.style.left = `left:${cOffset.left - hOffset.left}px`
-      fakeNeedle.style.top = `top:${cOffset.top - hOffset.top}px`
-      needle.classList.remove(quick)
-      let select = divides
-      if (select === 1) {
-        select = 60
-      }
-      select = me._nearestDivisor(select, 5)
-      // normalize 60 => 0
-      if (divides === 60) {
-        divides = 0
-      }
-      // remove previously selected value
-      if (selectedMinute) {
-        selectedMinute.id = ''
-        selectedMinute.classList.remove(selected)
-      }
-      // add the new selected
-      if (select > 0) {
-        select /= 5
-        select--
-        minuteViewChildren[select].id = sMinute
-        minuteViewChildren[select].classList.add(selected)
-      }
-      minute.textContent = me._numWithZero(divides)
-      me._sDialog.sDate.minutes(divides)
-    }
+    //   let slope = Math.atan2(-yPos, xPos)
+    //   needle.className = ''
+    //   if (slope < 0) {
+    //     slope += 2 * Math.PI
+    //   }
+    //   slope *= 180 / Math.PI
+    //   slope = 360 - slope
+    //   if (slope > 270) {
+    //     slope -= 360
+    //   }
+    //   divides = parseInt(slope / 6)
+    //   const same = Math.abs((6 * divides) - slope)
+    //   const upper = Math.abs((6 * (divides + 1)) - slope)
+    //   if (upper < same) {
+    //     divides++
+    //   }
+    //   divides += 15
+    //   needle.classList.add(selection)
+    //   needle.classList.add(quick)
+    //   needle.classList.add(rotate + (divides * 2))
+    //   minute.textContent = me._numWithZero(divides)
+    // })
+    // /**
+    //  * netTrek
+    //  * fixes for iOS - drag
+    //  */
+    // const onDragEnd = function () {
+    //   const minuteViewChildren = me._sDialog.minuteView.getElementsByTagName('div')
+    //   const sMinute = 'mddtp-minute__selected'
+    //   const selectedMinute = me._container.querySelector('#' + sMinute)
+    //   const cOffset = circle.getBoundingClientRect()
+    //   fakeNeedle.style.left = `left:${cOffset.left - hOffset.left}px`
+    //   fakeNeedle.style.top = `top:${cOffset.top - hOffset.top}px`
+    //   needle.classList.remove(quick)
+    //   let select = divides
+    //   if (select === 1) {
+    //     select = 60
+    //   }
+    //   select = me._nearestDivisor(select, 5)
+    //   // normalize 60 => 0
+    //   if (divides === 60) {
+    //     divides = 0
+    //   }
+    //   // remove previously selected value
+    //   if (selectedMinute) {
+    //     selectedMinute.id = ''
+    //     selectedMinute.classList.remove(selected)
+    //   }
+    //   // add the new selected
+    //   if (select > 0) {
+    //     select /= 5
+    //     select--
+    //     minuteViewChildren[select].id = sMinute
+    //     minuteViewChildren[select].classList.add(selected)
+    //   }
+    //   minute.textContent = me._numWithZero(divides)
+    //   me._sDialog.sDate.minutes(divides)
+    // }
 
-    fakeNeedleDraggabilly.on('pointerUp', onDragEnd)
-    fakeNeedleDraggabilly.on('dragEnd', onDragEnd)
+    // fakeNeedleDraggabilly.on('pointerUp', onDragEnd)
+    // fakeNeedleDraggabilly.on('dragEnd', onDragEnd)
   }
 
   /**
