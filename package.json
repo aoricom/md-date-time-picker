@@ -1,6 +1,6 @@
 {
   "name": "md-date-time-picker",
-  "version": "3.1.6",
+  "version": "3.1.7",
   "description": "An implementation of the Material Design Picker components in vanilla CSS, JS and HTML",
   "keywords": [
     "material",
@@ -15,6 +15,8 @@
     "input"
   ],
   "main": "dist/js/mdDateTimePicker.js",
+  "module": "src/js/mdDateTimePicker.js",
+  "jsnext:main": "src/js/mdDateTimePicker.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "gulp": "gulp",
