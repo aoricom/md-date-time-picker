@@ -9,7 +9,7 @@
 /**
 * import necessary components
 */
-import moment from 'moment'
+import moment from 'aori-moment'
 // import Draggabilly from 'draggabilly'
 
 class mdDateTimePicker {

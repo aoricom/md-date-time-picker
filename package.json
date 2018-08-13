@@ -1,6 +1,6 @@
 {
   "name": "md-date-time-picker",
-  "version": "3.1.8",
+  "version": "3.1.9",
   "description": "An implementation of the Material Design Picker components in vanilla CSS, JS and HTML",
   "keywords": [
     "material",
@@ -69,7 +69,7 @@
   },
   "dependencies": {
     "draggabilly": "^2.1.1",
-    "moment": "^2.17.1"
+    "aori-moment": "stat92/moment#2.22.3"
   },
   "repository": {
     "type": "git",
