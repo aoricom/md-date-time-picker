@@ -1324,7 +1324,8 @@ class mdDateTimePicker {
   _addCellClickEvent (el) {
     const me = this
     el.onclick = function (e) {
-      if (e.target && e.target.nodeName === 'SPAN') {
+
+      if (e.target && e.target.nodeName === 'SPAN' && !e.target.parentElement.classList.contains('mddtp-picker__cell--disabled')) {
 
         if (me._ranges) {
           const start = me._sDialog.bDate
@@ -1404,7 +1405,8 @@ class mdDateTimePicker {
           me._initViewHolder()
         } else {
           const day = e.target.textContent
-          const currentDate = me._sDialog.tDate.date(day)
+          const currentDate = me._sDialog.tDate.date(day);
+
           const sId = 'mddtp-date__selected'
           const sClass = 'mddtp-picker__cell--selected'
           const selected = me._container.querySelector('#' + sId)
