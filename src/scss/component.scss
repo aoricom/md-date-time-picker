@@ -48,7 +48,7 @@
   @include shadow-8dp();
   font-family: $regular !important;
   min-width: 5 * 56px;
-  max-width: 364px;
+  max-width: 362px;
   position: fixed;
   top: 50%;
   left: 50%;
@@ -62,7 +62,7 @@
   .mddtp-picker__header {
     width: 100px;
     background-color: $picker-header-color;
-    padding: 24px 24px 20px;
+    padding: 23px 24px 20px;
     .mddtp-picker__title {
       color: $color-secondary-text;
       font-family: $regular;
