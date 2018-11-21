@@ -234,7 +234,7 @@
         }
 
         &.mddtp-picker__cell--ranged {
-          background: rgba(25,118,210,0.50);
+          background: var(--range-color, rgba(25, 118, 210, 0.5));
           box-shadow: none;
         }
 
@@ -259,11 +259,11 @@
         }
 
         &.mddtp-picker__cell--begin {
-          background: linear-gradient(90deg, transparent 50%, rgba(25, 118, 210, 0.5) 50%);
+          background: linear-gradient(90deg, transparent 50%, var(--range-color, rgba(25, 118, 210, 0.5)) 50%);
         }
 
         &.mddtp-picker__cell--end {
-          background: linear-gradient(90deg, rgba(25, 118, 210, 0.5) 50%, transparent 50%);
+          background: linear-gradient(90deg, var(--range-color, rgba(25, 118, 210, 0.5)) 50%, transparent 50%);
         }
 
         &.mddtp-picker__cell--begin.mddtp-picker__cell--end {

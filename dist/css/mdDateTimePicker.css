@@ -203,7 +203,7 @@
         border-bottom-right-radius: 9px;
         border-top-right-radius: 9px; }
       .mddtp-picker__body .mddtp-picker__viewHolder .mddtp-picker__grid p.mddtp-picker__cell--ranged {
-        background: rgba(25, 118, 210, 0.5);
+        background: var(--range-color, rgba(25, 118, 210, 0.5));
         box-shadow: none; }
       .mddtp-picker__body .mddtp-picker__viewHolder .mddtp-picker__grid p span {
         display: inline-block;
@@ -222,9 +222,9 @@
         color: #1976D2;
         border: 1px solid #1976D2; }
       .mddtp-picker__body .mddtp-picker__viewHolder .mddtp-picker__grid p.mddtp-picker__cell--begin {
-        background: linear-gradient(90deg, transparent 50%, rgba(25, 118, 210, 0.5) 50%); }
+        background: linear-gradient(90deg, transparent 50%, var(--range-color, rgba(25, 118, 210, 0.5)) 50%); }
       .mddtp-picker__body .mddtp-picker__viewHolder .mddtp-picker__grid p.mddtp-picker__cell--end {
-        background: linear-gradient(90deg, rgba(25, 118, 210, 0.5) 50%, transparent 50%); }
+        background: linear-gradient(90deg, var(--range-color, rgba(25, 118, 210, 0.5)) 50%, transparent 50%); }
       .mddtp-picker__body .mddtp-picker__viewHolder .mddtp-picker__grid p.mddtp-picker__cell--begin.mddtp-picker__cell--end {
         background: transparent; }
       .mddtp-picker__body .mddtp-picker__viewHolder .mddtp-picker__grid p.mddtp-picker__cell--today span {
