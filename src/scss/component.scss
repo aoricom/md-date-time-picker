@@ -17,7 +17,7 @@
   text-transform: uppercase;
   outline: none;
   cursor: pointer;
-  color: $md-button-color;
+  color: var(--picker-button-color, $md-button-color);
   // Correct inability to style clickable `input` types in iOS.
   -webkit-appearance: button;
   // Address `overflow` set to `hidden` in IE 8/9/10/11.
@@ -61,7 +61,7 @@
   z-index: 99999;
   .mddtp-picker__header {
     width: 100px;
-    background-color: $picker-header-color;
+    background-color: var(--picker-header-background-color, $picker-header-color);
     padding: 23px 24px 20px;
     .mddtp-picker__title {
       color: $color-secondary-text;
@@ -86,7 +86,7 @@
   }
   .mddtp-picker__body {
     position: relative;
-    background-color: $picker-body-color;
+    background-color: var(--picker-body-background-color, $picker-body-color);
 
     .mddtp-picker__action {
       padding: 8px 0;
@@ -164,7 +164,7 @@
       .mddtp-picker__range:hover,
       .mddtp-picker__range--selected {
         background-color: rgba(25,118,210,0.24);
-        color: #1976D2;
+        color: var(--picker-range-selected-color, #1976D2);
       }
       .mddtp-picker__range--disabled, .mddtp-picker__range--disabled:hover {
         background-color: rgba(0,0,0,0.04);
@@ -215,7 +215,7 @@
 
       p {
         display: inline-block;
-        background-color: white;
+        background-color: var(--picker-grid-background-color, white);
         height: 16px;
         width: 48px;
         position: relative;
@@ -234,7 +234,7 @@
         }
 
         &.mddtp-picker__cell--ranged {
-          background: var(--range-color, rgba(25, 118, 210, 0.5));
+          background: var(--picker-range-background-color, rgba(25, 118, 210, 0.5));
           box-shadow: none;
         }
 
@@ -253,9 +253,9 @@
         }
 
         &.mddtp-picker__cell--selected span {
-          background-color: white;
-          color: #1976D2;
-          border: 1px solid #1976D2;
+          background-color: var(--picker-cell-selected-background-color, white);
+          color: var(--picker-cell-selected-color, #1976D2);
+          border: 1px solid var(--picker-cell-selected-border-color, #1976D2);
         }
 
         &.mddtp-picker__cell--begin {
