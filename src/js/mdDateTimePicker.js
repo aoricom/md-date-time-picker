@@ -252,9 +252,11 @@ class mdDateTimePicker {
   _showDialog () {
     const me = this
     const zoomIn = 'zoomIn'
-    mdDateTimePicker.dialog.state = true
-    this._sDialog.picker.classList.remove('mddtp-picker--inactive')
-    this._sDialog.picker.classList.add(zoomIn)
+
+    // if the dialog is forced into portrait mode
+    if (this._orientation === 'PORTRAIT') {
+      this._sDialog.picker.classList.add('mddtp-picker--portrait')
+    }
 
     if (this._alignTo) {
       const rect = this._alignTo.getBoundingClientRect()
@@ -265,10 +267,10 @@ class mdDateTimePicker {
       this._sDialog.picker.style.left = `${left}px`
     }
 
-    // if the dialog is forced into portrait mode
-    if (this._orientation === 'PORTRAIT') {
-      this._sDialog.picker.classList.add('mddtp-picker--portrait')
-    }
+    mdDateTimePicker.dialog.state = true
+    this._sDialog.picker.classList.remove('mddtp-picker--inactive')
+    this._sDialog.picker.classList.add(zoomIn)
+
     setTimeout(() => {
       me._sDialog.picker.classList.remove(zoomIn)
     }, 300)
