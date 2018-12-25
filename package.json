@@ -69,7 +69,7 @@
   },
   "dependencies": {
     "draggabilly": "^2.1.1",
-    "aori-moment": "stat92/moment#2.22.3"
+    "aori-moment": "aoricom/aori-moment#2.22.4"
   },
   "repository": {
     "type": "git",
