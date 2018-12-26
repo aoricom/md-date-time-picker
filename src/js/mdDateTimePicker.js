@@ -258,6 +258,9 @@ class mdDateTimePicker {
       this._sDialog.picker.classList.add('mddtp-picker--portrait')
     }
 
+    mdDateTimePicker.dialog.state = true
+    this._sDialog.picker.classList.remove('mddtp-picker--inactive')
+
     if (this._alignTo) {
       const rect = this._alignTo.getBoundingClientRect()
       const top = rect.y + rect.height + 8 + ((this._sDialog.picker.offsetHeight) / (2))
@@ -267,8 +270,6 @@ class mdDateTimePicker {
       this._sDialog.picker.style.left = `${left}px`
     }
 
-    mdDateTimePicker.dialog.state = true
-    this._sDialog.picker.classList.remove('mddtp-picker--inactive')
     this._sDialog.picker.classList.add(zoomIn)
 
     setTimeout(() => {
