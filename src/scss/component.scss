@@ -564,7 +564,7 @@
 @keyframes zoomIn {
   from {
     opacity: 0;
-    transform: scale3d(.3,.3,.3);
+    transform: translate3d(-50%,calc(-50% - 10px),0);
   }
   50% {
     opacity: 1;
@@ -576,7 +576,7 @@
   }
   50% {
     opacity: 0;
-    transform: scale3d(.3,.3,.3);
+    transform: translate3d(-50%,calc(-50% - 10px),0);
   }
   to {
     opacity: 0;
